@@ -2,12 +2,6 @@ import mongoose from "mongoose";
 
 const MONGODB_URI = process.env.MONGODB_URI;
 
-if (!MONGODB_URI) {
-  throw new Error(
-    "Missing MONGODB_URI. Add it to .env.local — see .env.example (a free MongoDB Atlas M0 cluster works fine)."
-  );
-}
-
 /**
  * Next.js reuses modules across hot-reloads and serverless invocations, so we
  * cache the connection on the global object. Without this, dev mode would
@@ -28,10 +22,16 @@ const cached: MongooseCache = global._mongooseCache ?? { conn: null, promise: nu
 global._mongooseCache = cached;
 
 export async function connectDB() {
+  if (!MONGODB_URI) {
+    throw new Error(
+      "Missing MONGODB_URI. Add it to .env.local — see .env.example (a free MongoDB Atlas M0 cluster works fine)."
+    );
+  }
+
   if (cached.conn) return cached.conn;
 
   if (!cached.promise) {
-    cached.promise = mongoose.connect(MONGODB_URI as string, {
+    cached.promise = mongoose.connect(MONGODB_URI, {
       bufferCommands: false,
     });
   }
