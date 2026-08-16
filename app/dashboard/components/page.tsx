@@ -2,6 +2,7 @@ import { requireSuperadmin } from "@/lib/auth";
 import { connectDB } from "@/lib/mongodb";
 import { ComponentType } from "@/models/ComponentType";
 import Link from "next/link";
+import { TerminalWindow } from "@/app/_components/TerminalWindow";
 
 export const revalidate = 0;
 
@@ -14,20 +15,7 @@ export default async function ComponentTypesListPage() {
   return (
     <div className="min-h-screen bg-[var(--color-background)] text-[var(--color-foreground)] font-mono p-6">
       <div className="max-w-5xl mx-auto space-y-6">
-        {/* Terminal Header Chrome */}
-        <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg overflow-hidden shadow-lg">
-          <div className="bg-[#17171b] px-4 py-2 border-b border-[var(--color-border)] flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="w-3 h-3 rounded-full bg-[var(--color-danger)] inline-block opacity-80" />
-              <span className="w-3 h-3 rounded-full bg-[var(--color-warning)] inline-block opacity-80" />
-              <span className="w-3 h-3 rounded-full bg-[var(--color-accent)] inline-block opacity-80" />
-            </div>
-            <div className="text-xs text-[var(--color-muted)] font-mono">
-              ~/cms/components
-            </div>
-            <div className="w-12" />
-          </div>
-
+        <TerminalWindow title="~/cms/components" redirectUrl="/dashboard" defaultMaxWidth="max-w-5xl">
           <div className="p-6 space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[var(--color-border)] pb-4">
               <div>
@@ -116,7 +104,7 @@ export default async function ComponentTypesListPage() {
               </div>
             )}
           </div>
-        </div>
+        </TerminalWindow>
       </div>
     </div>
   );

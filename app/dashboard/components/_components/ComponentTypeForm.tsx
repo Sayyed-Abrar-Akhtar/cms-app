@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { FIELD_TYPES, FIELD_TYPE_LABELS, type FieldType, type FieldDefinition } from "@/lib/field-types";
 import { createComponentTypeAction, updateComponentTypeAction } from "../actions";
+import { TerminalWindow } from "@/app/_components/TerminalWindow";
 
 export interface ComponentTypeFormProps {
   initialData?: {
@@ -215,23 +216,16 @@ export function ComponentTypeForm({ initialData, hasInstancesWarning }: Componen
     }
   };
 
+  const windowTitle = `~/cms/components/${isEditing ? `${initialData?.slug}.json` : "new.json"}`;
+
   return (
     <div className="min-h-screen bg-[var(--color-background)] text-[var(--color-foreground)] font-mono p-6">
       <div className="max-w-4xl mx-auto space-y-6">
-        {/* Terminal Header Chrome */}
-        <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg overflow-hidden shadow-lg">
-          <div className="bg-[#17171b] px-4 py-2 border-b border-[var(--color-border)] flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="w-3 h-3 rounded-full bg-[var(--color-danger)] inline-block opacity-80" />
-              <span className="w-3 h-3 rounded-full bg-[var(--color-warning)] inline-block opacity-80" />
-              <span className="w-3 h-3 rounded-full bg-[var(--color-accent)] inline-block opacity-80" />
-            </div>
-            <div className="text-xs text-[var(--color-muted)] font-mono">
-              ~/cms/components/{isEditing ? `${initialData?.slug}.json` : "new.json"}
-            </div>
-            <div className="w-12" />
-          </div>
-
+        <TerminalWindow
+          title={windowTitle}
+          redirectUrl="/dashboard/components"
+          defaultMaxWidth="max-w-4xl"
+        >
           <form onSubmit={handleSubmit} className="p-6 space-y-6">
             <div className="flex items-center justify-between border-b border-[var(--color-border)] pb-4">
               <div>
@@ -377,7 +371,7 @@ export function ComponentTypeForm({ initialData, hasInstancesWarning }: Componen
 
               {fieldRows.length === 0 ? (
                 <div className="p-4 text-center text-xs text-[var(--color-danger)] border border-dashed border-[var(--color-border)] rounded">
-                  At least one field is required. Click "+ Add Field" above.
+                  At least one field is required. Click &quot;+ Add Field&quot; above.
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -559,7 +553,7 @@ export function ComponentTypeForm({ initialData, hasInstancesWarning }: Componen
               </button>
             </div>
           </form>
-        </div>
+        </TerminalWindow>
       </div>
     </div>
   );
