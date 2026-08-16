@@ -2,12 +2,15 @@ import { requireSuperadmin } from "@/lib/auth";
 import { connectDB } from "@/lib/mongodb";
 import { Organization } from "@/models/Organization";
 import { User } from "@/models/User";
+import { ComponentType } from "@/models/ComponentType";
+import { ComponentInstance } from "@/models/ComponentInstance";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { TerminalWindow } from "@/app/_components/TerminalWindow";
 import { ApiKeyCard } from "./_components/ApiKeyCard";
 import { InviteEditorForm } from "./_components/InviteEditorForm";
 import { EditorList } from "./_components/EditorList";
+import { PageBuilder } from "./_components/PageBuilder";
 
 export const revalidate = 0;
 
@@ -40,6 +43,37 @@ export default async function OrganizationDetailPage({
   }));
 
   const orgIdStr = org._id.toString();
+
+  // Fetch available component types from library
+  const componentTypes = await ComponentType.find().sort({ name: 1 }).lean();
+  const serializedComponentTypes = componentTypes.map((ct) => ({
+    id: ct._id.toString(),
+    name: ct.name,
+    slug: ct.slug,
+    isRepeatable: ct.isRepeatable,
+    fieldsCount: ct.fields?.length || 0,
+  }));
+
+  // Fetch existing component instances for this org
+  const instances = await ComponentInstance.find({ organization: org._id })
+    .populate("componentType")
+    .sort({ page: 1, order: 1 })
+    .lean();
+
+  const serializedInstances = instances.map((inst) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const ct = inst.componentType as any;
+    return {
+      id: inst._id.toString(),
+      componentTypeId: ct?._id ? ct._id.toString() : inst.componentType.toString(),
+      componentTypeName: ct?.name || "Unknown Component",
+      componentTypeSlug: ct?.slug || "unknown",
+      isRepeatable: ct?.isRepeatable || false,
+      page: inst.page || "home",
+      order: inst.order ?? 0,
+      valuesCount: inst.values?.length || 0,
+    };
+  });
 
   return (
     <div className="min-h-screen bg-[var(--color-background)] text-[var(--color-foreground)] font-mono p-6">
@@ -98,6 +132,13 @@ export default async function OrganizationDetailPage({
                 </div>
               </div>
             </div>
+
+            {/* Page Builder Section */}
+            <PageBuilder
+              organizationId={orgIdStr}
+              componentTypes={serializedComponentTypes}
+              instances={serializedInstances}
+            />
 
             {/* Public API Key Card */}
             <ApiKeyCard
