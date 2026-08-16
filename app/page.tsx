@@ -1,6 +1,11 @@
 import Link from "next/link";
 
 export default function Home() {
+  const isAuthConfigured = Boolean(
+    process.env.NEXT_PUBLIC_MAGIC_PUBLISHABLE_KEY && process.env.MAGIC_SECRET_KEY
+  );
+  const isDbConfigured = Boolean(process.env.MONGODB_URI);
+
   return (
     <div className="min-h-screen bg-[var(--color-background)] text-[var(--color-foreground)] font-mono flex flex-col items-center justify-center p-6">
       <div className="w-full max-w-2xl bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg shadow-2xl overflow-hidden">
@@ -31,12 +36,11 @@ export default function Home() {
           </div>
 
           <div className="bg-[var(--color-background)] border border-[var(--color-border)] p-4 rounded text-xs space-y-2">
-            <div className="text-[var(--color-accent)] font-semibold">01. STATUS_CHECK</div>
-            <div className="text-[var(--color-muted)]">
-              AUTH_MODE: Magic Link (Passwordless)<br />
-              DATABASE: MongoDB Atlas via Mongoose<br />
-              IMAGE_CDN: Cloudinary Signed Uploads<br />
-              ROLES: SUPERADMIN | EDITOR
+            <div className="text-[var(--color-accent)] font-semibold">01. SYSTEM_OVERVIEW</div>
+            <div className="text-[var(--color-muted)] space-y-1">
+              <div>AUTH: {isAuthConfigured ? "Configured (Magic Link)" : "Pending env setup"}</div>
+              <div>DATABASE: {isDbConfigured ? "Configured (MongoDB Atlas)" : "Pending env setup"}</div>
+              <div>ROLES: SUPERADMIN | EDITOR</div>
             </div>
           </div>
 
@@ -53,11 +57,6 @@ export default function Home() {
             >
               Open Dashboard
             </Link>
-          </div>
-
-          <div className="pt-4 border-t border-[var(--color-border)] text-[10px] text-[var(--color-muted)] flex justify-between">
-            <span>CMS_LAYER: ACTIVE</span>
-            <span>API_STATUS: READ_ONLY_ENABLED</span>
           </div>
         </div>
       </div>
