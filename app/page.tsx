@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { TerminalWindow } from "@/app/_components/TerminalWindow";
 
 export default function Home() {
   const isAuthConfigured = Boolean(
@@ -8,20 +9,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-[var(--color-background)] text-[var(--color-foreground)] font-mono flex flex-col items-center justify-center p-6">
-      <div className="w-full max-w-2xl bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg shadow-2xl overflow-hidden">
-        {/* Terminal Header */}
-        <div className="bg-[#17171b] px-4 py-2.5 border-b border-[var(--color-border)] flex items-center justify-between select-none">
-          <div className="flex items-center gap-2">
-            <span className="w-3 h-3 rounded-full bg-[var(--color-danger)] inline-block opacity-80" />
-            <span className="w-3 h-3 rounded-full bg-[var(--color-warning)] inline-block opacity-80" />
-            <span className="w-3 h-3 rounded-full bg-[var(--color-accent)] inline-block opacity-80" />
-          </div>
-          <div className="text-xs text-[var(--color-muted)] font-mono tracking-tight">
-            ~/cms/system/info.sh
-          </div>
-          <div className="w-12" />
-        </div>
-
+      <TerminalWindow title="~/cms/system/info.sh" redirectUrl="/login" defaultMaxWidth="max-w-2xl">
         {/* Terminal Body */}
         <div className="p-8 space-y-6">
           <div className="space-y-2">
@@ -59,7 +47,7 @@ export default function Home() {
             </Link>
           </div>
         </div>
-      </div>
+      </TerminalWindow>
     </div>
   );
 }
