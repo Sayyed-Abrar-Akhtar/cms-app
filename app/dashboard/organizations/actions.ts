@@ -6,6 +6,8 @@ import { requireSuperadmin } from "@/lib/auth";
 import { connectDB } from "@/lib/mongodb";
 import { Organization } from "@/models/Organization";
 import { User } from "@/models/User";
+import { ComponentType } from "@/models/ComponentType";
+import { ComponentInstance } from "@/models/ComponentInstance";
 import { revalidatePath } from "next/cache";
 
 const OrganizationInputSchema = z.object({
@@ -236,6 +238,153 @@ export async function regenerateApiKeyAction(
       success: true,
       data: { publicApiKey: newApiKey },
     };
+  } catch (err) {
+    if (err instanceof Error) {
+      return { success: false, error: err.message };
+    }
+    return { success: false, error: "An unexpected error occurred." };
+  }
+}
+
+/* --- Task 4: Component Instance Management Server Actions --- */
+
+const AssignComponentSchema = z.object({
+  organizationId: z.string().trim().min(1, "Organization ID is required"),
+  componentTypeId: z.string().trim().min(1, "Component type is required"),
+  page: z
+    .string()
+    .trim()
+    .min(1, "Page name is required")
+    .regex(/^[a-z0-9\-_/]+$/i, "Page name must contain valid URL slug characters"),
+});
+
+export async function assignComponentAction(
+  organizationId: string,
+  componentTypeId: string,
+  page: string
+): Promise<ActionResponse> {
+  try {
+    await requireSuperadmin();
+    await connectDB();
+
+    const cleanPage = page.trim().toLowerCase();
+
+    const parsed = AssignComponentSchema.safeParse({
+      organizationId,
+      componentTypeId,
+      page: cleanPage,
+    });
+    if (!parsed.success) {
+      const firstIssue = parsed.error.issues[0];
+      return {
+        success: false,
+        error: firstIssue ? firstIssue.message : "Validation failed",
+      };
+    }
+
+    const org = await Organization.findById(organizationId);
+    if (!org) {
+      return { success: false, error: "Organization not found." };
+    }
+
+    const compType = await ComponentType.findById(componentTypeId);
+    if (!compType) {
+      return { success: false, error: "Component type blueprint not found." };
+    }
+
+    // Determine next order on this page
+    const lastInstance = await ComponentInstance.findOne({
+      organization: org._id,
+      page: cleanPage,
+    }).sort({ order: -1 });
+
+    const nextOrder = lastInstance ? lastInstance.order + 1 : 0;
+
+    await ComponentInstance.create({
+      organization: org._id,
+      componentType: compType._id,
+      page: cleanPage,
+      order: nextOrder,
+      values: [], // Values start empty; editors fill them in via Task 5's UI
+    });
+
+    revalidatePath(`/dashboard/organizations/${org.slug}`);
+
+    return { success: true };
+  } catch (err) {
+    if (err instanceof Error) {
+      return { success: false, error: err.message };
+    }
+    return { success: false, error: "An unexpected error occurred." };
+  }
+}
+
+export async function reorderInstancesAction(
+  organizationId: string,
+  page: string,
+  orderedInstanceIds: string[]
+): Promise<ActionResponse> {
+  try {
+    await requireSuperadmin();
+    await connectDB();
+
+    const org = await Organization.findById(organizationId);
+    if (!org) {
+      return { success: false, error: "Organization not found." };
+    }
+
+    const cleanPage = page.trim().toLowerCase();
+
+    // Update order for each instance in the page
+    const updatePromises = orderedInstanceIds.map((instanceId, idx) =>
+      ComponentInstance.updateOne(
+        {
+          _id: instanceId,
+          organization: org._id,
+          page: cleanPage,
+        },
+        { $set: { order: idx } }
+      )
+    );
+
+    await Promise.all(updatePromises);
+
+    revalidatePath(`/dashboard/organizations/${org.slug}`);
+
+    return { success: true };
+  } catch (err) {
+    if (err instanceof Error) {
+      return { success: false, error: err.message };
+    }
+    return { success: false, error: "An unexpected error occurred." };
+  }
+}
+
+export async function removeInstanceAction(
+  organizationId: string,
+  instanceId: string
+): Promise<ActionResponse> {
+  try {
+    await requireSuperadmin();
+    await connectDB();
+
+    const org = await Organization.findById(organizationId);
+    if (!org) {
+      return { success: false, error: "Organization not found." };
+    }
+
+    const deleted = await ComponentInstance.findOneAndDelete({
+      _id: instanceId,
+      organization: org._id,
+    });
+
+    if (!deleted) {
+      return { success: false, error: "Component instance not found." };
+    }
+
+    revalidatePath(`/dashboard/organizations/${org.slug}`);
+
+    return { success: true };
   } catch (err) {
     if (err instanceof Error) {
       return { success: false, error: err.message };

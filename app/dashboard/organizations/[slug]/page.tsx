@@ -2,12 +2,15 @@ import { requireSuperadmin } from "@/lib/auth";
 import { connectDB } from "@/lib/mongodb";
 import { Organization } from "@/models/Organization";
 import { User } from "@/models/User";
+import { ComponentType } from "@/models/ComponentType";
+import { ComponentInstance } from "@/models/ComponentInstance";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { TerminalWindow } from "@/app/_components/TerminalWindow";
 import { ApiKeyCard } from "./_components/ApiKeyCard";
 import { InviteEditorForm } from "./_components/InviteEditorForm";
 import { EditorList } from "./_components/EditorList";
+import { PageBuilder, type ComponentTypeBlueprint, type ComponentInstanceItem } from "./_components/PageBuilder";
 
 export const revalidate = 0;
 
@@ -38,6 +41,46 @@ export default async function OrganizationDetailPage({
     email: e.email,
     createdAt: e.createdAt ? e.createdAt.toISOString() : new Date().toISOString(),
   }));
+
+  const compTypes = await ComponentType.find().sort({ name: 1 }).lean();
+  const serializedCompTypes: ComponentTypeBlueprint[] = compTypes.map((ct) => ({
+    id: ct._id.toString(),
+    name: ct.name,
+    slug: ct.slug,
+    isRepeatable: ct.isRepeatable,
+    fieldsCount: ct.fields?.length || 0,
+  }));
+
+  const rawInstances = await ComponentInstance.find({ organization: org._id })
+    .populate("componentType")
+    .sort({ page: 1, order: 1 })
+    .lean();
+
+  const serializedInstances: ComponentInstanceItem[] = rawInstances
+    .filter((inst) => inst.componentType != null)
+    .map((inst) => {
+      // populated componentType cast
+      const ctObj = inst.componentType as unknown as {
+        _id: { toString(): string };
+        name: string;
+        slug: string;
+        isRepeatable: boolean;
+        fields?: unknown[];
+      };
+
+      return {
+        id: inst._id.toString(),
+        page: inst.page,
+        order: inst.order,
+        componentType: {
+          id: ctObj._id.toString(),
+          name: ctObj.name,
+          slug: ctObj.slug,
+          isRepeatable: ctObj.isRepeatable,
+          fieldsCount: ctObj.fields?.length || 0,
+        },
+      };
+    });
 
   const orgIdStr = org._id.toString();
 
@@ -104,6 +147,13 @@ export default async function OrganizationDetailPage({
               organizationId={orgIdStr}
               initialApiKey={org.publicApiKey}
               slug={org.slug}
+            />
+
+            {/* Page Builder Section (Component Assignments) */}
+            <PageBuilder
+              organizationId={orgIdStr}
+              componentTypes={serializedCompTypes}
+              instances={serializedInstances}
             />
 
             {/* Editor List Section */}
