@@ -8,6 +8,8 @@ export default function LoginPage() {
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [errorMessage, setErrorMessage] = useState("");
 
+  const isAuthConfigured = Boolean(process.env.NEXT_PUBLIC_MAGIC_PUBLISHABLE_KEY);
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!email) return;
@@ -130,7 +132,7 @@ export default function LoginPage() {
           </form>
 
           <div className="pt-2 border-t border-[var(--color-border)] text-[10px] text-[var(--color-muted)] font-mono flex justify-between">
-            <span>SECURE_AUTH: ACTIVE</span>
+            <span>SECURE_AUTH: {isAuthConfigured ? "CONFIGURED" : "PENDING_SETUP"}</span>
             <span>CMS_v0.1.0</span>
           </div>
         </div>
