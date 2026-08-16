@@ -4,6 +4,21 @@ import { ComponentType } from "@/models/ComponentType";
 import { ComponentInstance } from "@/models/ComponentInstance";
 import { notFound } from "next/navigation";
 import { ComponentTypeForm } from "../_components/ComponentTypeForm";
+import type { Metadata } from "next";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  await connectDB();
+  const ct = await ComponentType.findOne({ slug }).select("name").lean();
+  return {
+    title: ct ? `Edit: ${ct.name}` : "Edit Component Type",
+    description: `Edit component type field configuration for ${slug}`,
+  };
+}
 
 export const revalidate = 0;
 

@@ -1,6 +1,12 @@
 import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Dashboard",
+  description: "CMS admin dashboard",
+};
 
 export default async function DashboardPage({
   searchParams,

@@ -2,6 +2,12 @@ import { requireSuperadmin } from "@/lib/auth";
 import { connectDB } from "@/lib/mongodb";
 import { ComponentType } from "@/models/ComponentType";
 import Link from "next/link";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Component Types",
+  description: "Manage component type blueprints and field schemas",
+};
 
 export const revalidate = 0;
 
