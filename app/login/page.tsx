@@ -17,6 +17,26 @@ export default function LoginPage() {
     setErrorMessage("");
 
     try {
+      const checkRes = await fetch("/api/auth/check-email", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      const checkData = await checkRes.json();
+
+      if (!checkRes.ok) {
+        throw new Error(checkData.error || "Failed to verify email registration.");
+      }
+
+      if (!checkData.exists) {
+        setStatus("error");
+        setErrorMessage("This email isn't registered for CMS access — contact your administrator.");
+        return;
+      }
+
       const apiKey = process.env.NEXT_PUBLIC_MAGIC_PUBLISHABLE_KEY;
       if (!apiKey) {
         throw new Error("Magic Publishable Key is not configured (NEXT_PUBLIC_MAGIC_PUBLISHABLE_KEY).");
