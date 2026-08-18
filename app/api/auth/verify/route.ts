@@ -43,31 +43,29 @@ export async function POST(request: Request) {
 
     await connectDB();
 
-    let user = await User.findOne({
+    const user = await User.findOne({
       $or: [{ magicIssuer: issuer }, { email: cleanEmail }],
     });
 
     if (!user) {
-      // Create new user with EDITOR role and no organization
-      user = await User.create({
-        email: cleanEmail,
-        role: "EDITOR",
-        organizations: [],
-        magicIssuer: issuer,
-      });
-    } else {
-      let updated = false;
-      if (!user.magicIssuer) {
-        user.magicIssuer = issuer;
-        updated = true;
-      }
-      if (user.email !== cleanEmail) {
-        user.email = cleanEmail;
-        updated = true;
-      }
-      if (updated) {
-        await user.save();
-      }
+      // Invite-only auth: reject unknown emails
+      return NextResponse.json(
+        { error: "Access denied: Account not invited. Contact your administrator." },
+        { status: 401 }
+      );
+    }
+
+    let updated = false;
+    if (!user.magicIssuer) {
+      user.magicIssuer = issuer;
+      updated = true;
+    }
+    if (user.email !== cleanEmail) {
+      user.email = cleanEmail;
+      updated = true;
+    }
+    if (updated) {
+      await user.save();
     }
 
     const sessionPayload = {

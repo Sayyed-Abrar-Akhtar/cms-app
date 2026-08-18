@@ -17,7 +17,14 @@ function isNonEmpty(value: unknown): boolean {
   if (value === null || value === undefined) return false;
   if (typeof value === "string") return value.trim().length > 0;
   if (Array.isArray(value)) return value.length > 0;
-  if (typeof value === "object") return Object.keys(value).length > 0;
+  if (typeof value === "object") {
+    const keys = Object.keys(value);
+    if (keys.length === 0) return false;
+    // Check if object fields have any non-empty string values
+    return Object.values(value as Record<string, unknown>).some(
+      (v) => typeof v === "string" && v.trim().length > 0
+    );
+  }
   return true; // numbers (incl. 0) and booleans (incl. false) count as present
 }
 
@@ -41,12 +48,6 @@ export function isCloudinaryUrl(value: unknown): boolean {
 /* Rich text (Tiptap JSON) sanitization                                */
 /* ------------------------------------------------------------------ */
 
-/**
- * The editor schema is deliberately restricted (AGENTS.md §6): paragraphs,
- * H2/H3, bold/italic/links, lists, blockquote, hard break, controlled
- * images. Anything else stored in the database is either a bug or an
- * attack, so we strip it on write rather than trusting the client.
- */
 const ALLOWED_NODE_TYPES = new Set([
   "doc",
   "paragraph",
@@ -75,7 +76,6 @@ function sanitizeMark(mark: { type?: string; attrs?: Record<string, unknown> }):
   if (mark.type === "link") {
     const href = mark.attrs?.href;
     const url = parseHttpUrl(href);
-    // mailto: is fine for links too, but we only accept what we can verify
     const isMailto =
       typeof href === "string" && /^mailto:[^@\s]+@[^@\s]+\.[^@\s]+$/.test(href.trim());
     if (!url && !isMailto) return null;
@@ -108,7 +108,7 @@ function sanitizeNode(node: JsonNode): JsonNode | null {
 
   if (node.type === "image") {
     const src = node.attrs?.src;
-    if (!isCloudinaryUrl(src)) return null; // drop non-Cloudinary images
+    if (!isCloudinaryUrl(src)) return null;
     out.attrs = {
       src: (src as string).trim(),
       alt: typeof node.attrs?.alt === "string" ? node.attrs.alt : "",
@@ -231,6 +231,11 @@ export function validateFieldValue(
       const link = rawValue as { label?: unknown; href?: unknown };
       const linkLabel = typeof link.label === "string" ? link.label.trim() : "";
       const url = parseHttpUrl(link.href);
+
+      if (!field.required && !linkLabel && !url) {
+        return { ok: true, value: null };
+      }
+
       if (field.required && linkLabel.length === 0) {
         return { ok: false, error: `${label} needs a label.` };
       }

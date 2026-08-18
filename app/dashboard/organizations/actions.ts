@@ -7,6 +7,7 @@ import { connectDB } from "@/lib/mongodb";
 import { Organization } from "@/models/Organization";
 import { User } from "@/models/User";
 import { revalidatePath } from "next/cache";
+import { sendEditorInviteEmail } from "@/lib/email";
 
 const OrganizationInputSchema = z.object({
   name: z.string().trim().min(1, "Organization name is required"),
@@ -31,6 +32,7 @@ export type ActionResponse<T = unknown> = {
   success: boolean;
   error?: string;
   message?: string;
+  warning?: string;
   data?: T;
 };
 
@@ -171,8 +173,27 @@ export async function inviteEditorAction(
     revalidatePath("/dashboard/organizations");
     revalidatePath(`/dashboard/organizations/${org.slug}`);
 
+    // Send transactional invitation email
+    let warning: string | undefined = undefined;
+    try {
+      const emailResult = await sendEditorInviteEmail({
+        to: cleanEmail,
+        organizationName: org.name,
+      });
+
+      if (!emailResult.success) {
+        warning =
+          "Editor added, but the notification email failed to send — share the login link with them directly.";
+      }
+    } catch (emailErr) {
+      console.error("Failed to send editor invitation email:", emailErr);
+      warning =
+        "Editor added, but the notification email failed to send — share the login link with them directly.";
+    }
+
     return {
       success: true,
+      warning,
     };
   } catch (err) {
     if (err instanceof Error) {
@@ -232,8 +253,6 @@ export async function regenerateApiKeyAction(
     const newApiKey = crypto.randomBytes(24).toString("hex");
     org.publicApiKey = newApiKey;
     await org.save();
-
-    // TODO: Verify that regenerating publicApiKey immediately invalidates the old key once Task 7's public API is implemented.
 
     revalidatePath("/dashboard/organizations");
     revalidatePath(`/dashboard/organizations/${org.slug}`);

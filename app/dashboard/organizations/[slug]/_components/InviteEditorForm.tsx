@@ -11,11 +11,13 @@ export function InviteEditorForm({ organizationId }: InviteEditorFormProps) {
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [warningMsg, setWarningMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setWarningMsg(null);
     setSuccessMsg(null);
     setIsSubmitting(true);
 
@@ -24,9 +26,13 @@ export function InviteEditorForm({ organizationId }: InviteEditorFormProps) {
       if (!res.success) {
         setError(res.error || "Failed to invite editor.");
       } else {
-        setSuccessMsg(res.message || `Editor '${email.trim().toLowerCase()}' invited successfully.`);
+        if (res.warning) {
+          setWarningMsg(res.warning);
+        } else {
+          setSuccessMsg(res.message || `Editor '${email.trim().toLowerCase()}' invited successfully.`);
+          setTimeout(() => setSuccessMsg(null), 4000);
+        }
         setEmail("");
-        setTimeout(() => setSuccessMsg(null), 4000);
       }
     } catch {
       setError("An unexpected error occurred while inviting editor.");
@@ -49,6 +55,12 @@ export function InviteEditorForm({ organizationId }: InviteEditorFormProps) {
       {error && (
         <div className="p-3 bg-red-950/40 border border-[var(--color-danger)]/50 rounded text-xs text-[var(--color-danger)]">
           [conflict/error] {error}
+        </div>
+      )}
+
+      {warningMsg && (
+        <div className="p-3 bg-yellow-950/40 border border-[var(--color-warning)]/50 rounded text-xs text-[var(--color-warning)]">
+          [warning] {warningMsg}
         </div>
       )}
 

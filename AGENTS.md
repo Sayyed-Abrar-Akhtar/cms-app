@@ -212,7 +212,9 @@ earned by the content (these are literally field configs), not decoration.
 ## 10. Environment variables
 
 See `.env.example` for the full list and where to get each value
-(MongoDB Atlas, Magic dashboard, Cloudinary dashboard).
+(MongoDB Atlas, Magic dashboard, Cloudinary dashboard, Resend dashboard).
+- `RESEND_API_KEY`: API key from Resend.
+- `RESEND_FROM_EMAIL`: Sender address, e.g. `"CMS <cms@sayyedabrarakhtar.com.np>"` (note: sending domain must be verified in Resend dashboard via DNS records before emails will deliver).
 
 ## 11. Current repo state
 
