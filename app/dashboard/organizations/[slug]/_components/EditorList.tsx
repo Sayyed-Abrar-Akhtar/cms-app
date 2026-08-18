@@ -1,11 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { removeEditorAction } from "@/app/dashboard/organizations/actions";
+import { removeEditorAction, resetEditorQuotaAction } from "@/app/dashboard/organizations/actions";
 
 interface EditorItem {
   id: string;
   email: string;
+  updatesUsedInPeriod?: number;
+  updateQuota?: number;
   createdAt: string;
 }
 
@@ -17,6 +19,7 @@ interface EditorListProps {
 export function EditorList({ organizationId, editors }: EditorListProps) {
   const [removingId, setRemovingId] = useState<string | null>(null);
   const [confirmId, setConfirmId] = useState<string | null>(null);
+  const [resettingId, setResettingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const handleRemove = async (userId: string) => {
@@ -34,6 +37,22 @@ export function EditorList({ organizationId, editors }: EditorListProps) {
       setError("An unexpected error occurred while removing editor.");
     } finally {
       setRemovingId(null);
+    }
+  };
+
+  const handleResetQuota = async (userId: string) => {
+    setError(null);
+    setResettingId(userId);
+
+    try {
+      const res = await resetEditorQuotaAction(userId, organizationId);
+      if (!res.success) {
+        setError(res.error || "Failed to reset quota.");
+      }
+    } catch {
+      setError("An unexpected error occurred while resetting quota.");
+    } finally {
+      setResettingId(null);
     }
   };
 
@@ -81,9 +100,22 @@ export function EditorList({ organizationId, editors }: EditorListProps) {
                   <div className="text-[10px] text-[var(--color-muted)]">
                     Attached: {new Date(editor.createdAt).toLocaleDateString()}
                   </div>
+                  {typeof editor.updatesUsedInPeriod === "number" && (
+                    <div className="text-[10px] text-[var(--color-foreground)] font-mono mt-0.5">
+                      Quota used: {editor.updatesUsedInPeriod} / {editor.updateQuota ?? 30}
+                    </div>
+                  )}
                 </div>
 
-                <div>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => handleResetQuota(editor.id)}
+                    disabled={resettingId === editor.id}
+                    className="py-1 px-3 bg-[var(--color-surface)] hover:bg-[var(--color-border)] border border-[var(--color-border)] text-[var(--color-foreground)] rounded font-semibold text-[11px] transition-colors disabled:opacity-50"
+                  >
+                    {resettingId === editor.id ? "Resetting…" : "Reset quota"}
+                  </button>
                   {isConfirming ? (
                     <div className="flex items-center gap-2">
                       <span className="text-[10px] text-[var(--color-danger)] font-semibold">

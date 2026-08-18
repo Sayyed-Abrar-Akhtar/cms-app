@@ -73,6 +73,31 @@ export async function saveInstanceValuesAction(
       }
     }
 
+    // Quota check for EDITORS
+    if (user.role === "EDITOR") {
+      const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
+      const now = new Date();
+      const periodStart = user.quotaPeriodStart ? new Date(user.quotaPeriodStart).getTime() : now.getTime();
+
+      if (now.getTime() >= periodStart + THIRTY_DAYS_MS) {
+        user.updatesUsedInPeriod = 0;
+        user.quotaPeriodStart = now;
+      }
+
+      const quota = user.updateQuota ?? 30;
+      const used = user.updatesUsedInPeriod ?? 0;
+
+      if (used >= quota) {
+        return {
+          success: false,
+          error: `You've used all ${quota} of your updates for this period. Ask your admin if you need more.`,
+        };
+      }
+
+      user.updatesUsedInPeriod = used + 1;
+      await user.save();
+    }
+
     instance.values = nextValues;
     instance.updatedAt = new Date();
     instance.updatedBy = user.email;

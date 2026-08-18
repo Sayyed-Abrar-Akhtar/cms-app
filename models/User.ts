@@ -7,6 +7,9 @@ export interface UserDoc extends Document {
   role: Role;
   organizations: Types.ObjectId[];
   magicIssuer?: string | null; // Magic's stable per-user DID, set on first login
+  updateQuota: number;
+  updatesUsedInPeriod: number;
+  quotaPeriodStart: Date;
   createdAt: Date;
 }
 
@@ -15,6 +18,9 @@ const UserSchema = new Schema<UserDoc>({
   role: { type: String, enum: ["SUPERADMIN", "EDITOR"], default: "EDITOR" },
   organizations: [{ type: Schema.Types.ObjectId, ref: "Organization" }],
   magicIssuer: { type: String, unique: true, sparse: true, default: null },
+  updateQuota: { type: Number, default: 30 },
+  updatesUsedInPeriod: { type: Number, default: 0 },
+  quotaPeriodStart: { type: Date, default: Date.now },
   createdAt: { type: Date, default: Date.now },
 });
 

@@ -217,6 +217,40 @@ export async function removeEditorAction(
   }
 }
 
+export async function resetEditorQuotaAction(
+  userId: string,
+  organizationId?: string
+): Promise<ActionResponse> {
+  try {
+    await requireSuperadmin();
+    await connectDB();
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return { success: false, error: "Editor not found." };
+    }
+
+    user.updatesUsedInPeriod = 0;
+    user.quotaPeriodStart = new Date();
+    await user.save();
+
+    if (organizationId) {
+      const org = await Organization.findById(organizationId);
+      if (org) {
+        revalidatePath(`/dashboard/organizations/${org.slug}`);
+      }
+    }
+    revalidatePath("/dashboard/organizations");
+
+    return { success: true };
+  } catch (err) {
+    if (err instanceof Error) {
+      return { success: false, error: err.message };
+    }
+    return { success: false, error: "An unexpected error occurred." };
+  }
+}
+
 export async function regenerateApiKeyAction(
   organizationId: string
 ): Promise<ActionResponse<{ publicApiKey: string }>> {
