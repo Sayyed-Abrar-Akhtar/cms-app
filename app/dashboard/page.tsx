@@ -2,6 +2,21 @@ import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { TerminalWindow } from "@/app/_components/TerminalWindow";
+import { connectDB } from "@/lib/mongodb";
+import { ComponentInstance } from "@/models/ComponentInstance";
+
+async function getEditorPages(organizationId: unknown) {
+  await connectDB();
+  const rows = await ComponentInstance.aggregate<{
+    _id: string;
+    count: number;
+  }>([
+    { $match: { organization: organizationId } },
+    { $group: { _id: "$page", count: { $sum: 1 } } },
+    { $sort: { _id: 1 } },
+  ]);
+  return rows.map((row) => ({ page: row._id, count: row.count }));
+}
 
 export default async function DashboardPage({
   searchParams,
@@ -89,19 +104,59 @@ export default async function DashboardPage({
                     </p>
                   </div>
                 ) : (
-                  <div className="p-4 bg-[var(--color-surface-hover)] border border-[var(--color-border)] rounded text-xs">
-                    <div className="font-semibold text-[var(--color-accent)]">
-                      Organization Content Editor
-                    </div>
-                    <p className="text-[var(--color-muted)] mt-1">
-                      Select a page to edit content values.
-                    </p>
-                  </div>
+                  <EditorPageList organizationId={user.organization} />
                 )}
               </div>
             )}
           </div>
         </TerminalWindow>
+      </div>
+    </div>
+  );
+}
+
+async function EditorPageList({
+  organizationId,
+}: {
+  organizationId: unknown;
+}) {
+  const pages = await getEditorPages(organizationId);
+
+  if (pages.length === 0) {
+    return (
+      <div className="p-4 bg-[var(--color-surface-hover)] border border-[var(--color-border)] rounded text-xs space-y-2">
+        <div className="font-semibold text-[var(--color-muted)]">
+          No components assigned yet
+        </div>
+        <p className="text-[var(--color-muted)]">
+          Your admin hasn&apos;t placed any components on your pages — once
+          they do, each page shows up here for you to fill in.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      <h2 className="text-sm font-semibold text-[var(--color-accent)]">
+        Your pages
+      </h2>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {pages.map(({ page, count }) => (
+          <Link
+            key={page}
+            href={`/dashboard/${encodeURIComponent(page)}`}
+            className="p-4 bg-[var(--color-surface-hover)] border border-[var(--color-border)] rounded hover:border-[var(--color-accent)] transition-colors block"
+          >
+            <div className="text-sm font-bold text-[var(--color-foreground)]">
+              ▤ {page}
+              <span className="text-[var(--color-muted)]">.page</span>
+            </div>
+            <div className="text-xs text-[var(--color-muted)] mt-1">
+              {count} component{count === 1 ? "" : "s"} to fill in.
+            </div>
+          </Link>
+        ))}
       </div>
     </div>
   );
