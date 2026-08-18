@@ -6,6 +6,7 @@ import { requireSuperadmin } from "@/lib/auth";
 import { connectDB } from "@/lib/mongodb";
 import { Organization } from "@/models/Organization";
 import { User } from "@/models/User";
+import { sendEditorInviteEmail } from "@/lib/email";
 import { revalidatePath } from "next/cache";
 
 const OrganizationInputSchema = z.object({
@@ -30,6 +31,7 @@ export type OrganizationInput = z.infer<typeof OrganizationInputSchema>;
 export type ActionResponse<T = unknown> = {
   success: boolean;
   error?: string;
+  warning?: string;
   message?: string;
   data?: T;
 };
@@ -170,6 +172,24 @@ export async function inviteEditorAction(
 
     revalidatePath("/dashboard/organizations");
     revalidatePath(`/dashboard/organizations/${org.slug}`);
+
+    // Send email notification for new attachment
+    const emailResult = await sendEditorInviteEmail({
+      to: cleanEmail,
+      organizationName: org.name,
+    });
+
+    if (!emailResult.success) {
+      console.error(
+        `Failed to send editor invite email to ${cleanEmail}:`,
+        emailResult.error
+      );
+      return {
+        success: true,
+        warning:
+          "Editor added, but the notification email failed to send — share the login link with them directly.",
+      };
+    }
 
     return {
       success: true,
