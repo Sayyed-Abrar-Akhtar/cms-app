@@ -181,6 +181,9 @@ earned by the content (these are literally field configs), not decoration.
 
 ## 8. Security rules — non-negotiable
 
+- Authentication is invite-only — no self-registration. New accounts are
+  only ever created via the seed script (superadmin) or the Invite Editor
+  flow (editors). The magic-link verify endpoint must reject unknown emails.
 - Every mutation (Server Action or Route Handler) re-checks `role` and, for
   editors, `organizations` **server-side** from the session — never trust a
   client-supplied `organizationId` or `role`.
