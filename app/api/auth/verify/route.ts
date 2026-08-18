@@ -43,7 +43,7 @@ export async function POST(request: Request) {
 
     await connectDB();
 
-    const user = await User.findOne({
+    let user = await User.findOne({
       $or: [{ magicIssuer: issuer }, { email: cleanEmail }],
     });
 
