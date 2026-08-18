@@ -24,7 +24,7 @@ export function InviteEditorForm({ organizationId }: InviteEditorFormProps) {
       if (!res.success) {
         setError(res.error || "Failed to invite editor.");
       } else {
-        setSuccessMsg(`Editor '${email.trim().toLowerCase()}' invited successfully.`);
+        setSuccessMsg(res.message || `Editor '${email.trim().toLowerCase()}' invited successfully.`);
         setEmail("");
         setTimeout(() => setSuccessMsg(null), 4000);
       }

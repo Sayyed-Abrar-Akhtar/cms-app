@@ -43,35 +43,38 @@ export async function POST(request: Request) {
 
     await connectDB();
 
-    const user = await User.findOne({
+    let user = await User.findOne({
       $or: [{ magicIssuer: issuer }, { email: cleanEmail }],
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: "This email isn't registered for CMS access — contact your administrator." },
-        { status: 401 }
-      );
-    }
-
-    let updated = false;
-    if (!user.magicIssuer) {
-      user.magicIssuer = issuer;
-      updated = true;
-    }
-    if (user.email !== cleanEmail) {
-      user.email = cleanEmail;
-      updated = true;
-    }
-    if (updated) {
-      await user.save();
+      // Create new user with EDITOR role and no organization
+      user = await User.create({
+        email: cleanEmail,
+        role: "EDITOR",
+        organizations: [],
+        magicIssuer: issuer,
+      });
+    } else {
+      let updated = false;
+      if (!user.magicIssuer) {
+        user.magicIssuer = issuer;
+        updated = true;
+      }
+      if (user.email !== cleanEmail) {
+        user.email = cleanEmail;
+        updated = true;
+      }
+      if (updated) {
+        await user.save();
+      }
     }
 
     const sessionPayload = {
       userId: user._id.toString(),
       email: user.email,
       role: user.role,
-      organizationId: user.organization ? user.organization.toString() : null,
+      organizationId: user.organizations && user.organizations.length > 0 ? user.organizations[0].toString() : null,
     };
 
     const sessionToken = await createSessionToken(sessionPayload);

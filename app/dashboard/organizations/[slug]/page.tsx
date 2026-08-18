@@ -30,7 +30,7 @@ export default async function OrganizationDetailPage({
   }
 
   const editors = await User.find({
-    organization: org._id,
+    organizations: org._id,
     role: "EDITOR",
   })
     .sort({ createdAt: -1 })

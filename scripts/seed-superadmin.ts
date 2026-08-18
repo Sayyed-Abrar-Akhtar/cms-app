@@ -20,12 +20,14 @@ async function seedSuperadmin() {
       user = await User.create({
         email: cleanEmail,
         role: "SUPERADMIN",
-        organization: null,
+        organizations: [],
       });
       console.log(`Created new superadmin user: ${cleanEmail}`);
     } else {
       user.role = "SUPERADMIN";
-      user.organization = null;
+      if (!user.organizations) {
+        user.organizations = [];
+      }
       await user.save();
       console.log(`Promoted existing user to superadmin: ${cleanEmail}`);
     }
