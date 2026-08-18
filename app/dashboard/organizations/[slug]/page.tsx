@@ -36,11 +36,25 @@ export default async function OrganizationDetailPage({
     .sort({ createdAt: -1 })
     .lean();
 
-  const serializedEditors = editors.map((e) => ({
-    id: e._id.toString(),
-    email: e.email,
-    createdAt: e.createdAt ? e.createdAt.toISOString() : new Date().toISOString(),
-  }));
+  const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
+  const now = new Date();
+
+  const serializedEditors = editors.map((e) => {
+    const periodStart = e.quotaPeriodStart ? new Date(e.quotaPeriodStart).getTime() : now.getTime();
+    let used = e.updatesUsedInPeriod ?? 0;
+    if (now.getTime() >= periodStart + THIRTY_DAYS_MS) {
+      used = 0;
+    }
+    const quota = e.updateQuota ?? 30;
+
+    return {
+      id: e._id.toString(),
+      email: e.email,
+      updatesUsedInPeriod: used,
+      updateQuota: quota,
+      createdAt: e.createdAt ? e.createdAt.toISOString() : new Date().toISOString(),
+    };
+  });
 
   const orgIdStr = org._id.toString();
 

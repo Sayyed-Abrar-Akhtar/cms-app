@@ -53,6 +53,22 @@ export default async function PageEditorPage({
     notFound();
   }
 
+  // Calculate quota info if editor
+  let quotaInfo: { remaining: number; quota: number } | null = null;
+  if (user.role === "EDITOR") {
+    const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
+    const now = new Date();
+    const periodStart = user.quotaPeriodStart ? new Date(user.quotaPeriodStart).getTime() : now.getTime();
+
+    let used = user.updatesUsedInPeriod ?? 0;
+    if (now.getTime() >= periodStart + THIRTY_DAYS_MS) {
+      used = 0;
+    }
+    const quota = user.updateQuota ?? 30;
+    const remaining = Math.max(0, quota - used);
+    quotaInfo = { remaining, quota };
+  }
+
   const instances: InstanceData[] = docs.map((doc) => {
     const type = doc.componentType as unknown as ComponentTypeDoc | null;
     const values: Record<string, unknown> = {};
@@ -89,6 +105,11 @@ export default async function PageEditorPage({
                   <span className="rounded bg-[var(--color-accent-dim)] px-2 py-0.5 text-xs text-[var(--color-accent)] font-semibold">
                     {org.name}
                   </span>
+                  {quotaInfo && (
+                    <span className="rounded border border-[var(--color-border)] bg-[var(--color-surface)] px-2 py-0.5 text-xs text-[var(--color-foreground)] font-mono">
+                      {quotaInfo.remaining} of {quotaInfo.quota} updates left this period
+                    </span>
+                  )}
                 </div>
                 <p className="mt-1 text-xs text-[var(--color-muted)]">
                   {instances.length} component{instances.length === 1 ? "" : "s"} —
