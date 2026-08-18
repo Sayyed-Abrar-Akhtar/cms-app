@@ -45,14 +45,21 @@ Ensure the following variables are present in your `.env.local`:
    ```
    Confirm output indicates either `Created new superadmin user: <email>` or `Promoted existing user to superadmin: <email>`.
 
-2. **Login Loop Verification:**
+2. **Data Migration (User Organizations):**
+   To convert legacy `User` documents from a singular `organization` field to the many-to-many `organizations` array format:
+   ```bash
+   npm run migrate
+   ```
+   Confirm output indicates `Migration complete. Processed X user(s).`.
+
+3. **Login Loop Verification:**
    - Navigate to `/login`.
    - Enter your email address (matching `SUPERADMIN_EMAIL`).
    - Check your inbox for the Magic Link email and click the link.
    - You should land authenticated on `/dashboard` with `ROLE: SUPERADMIN`.
    - If an email cannot be received (e.g. invalid keys or environment restrictions), `/login` will display a standard authentication error from Magic SDK.
 
-3. **Role & Route Access Verification:**
+4. **Role & Route Access Verification:**
    - **Logged Out:** Directly visiting `/dashboard`, `/dashboard/components`, or `/dashboard/organizations` redirects to `/login`.
    - **SUPERADMIN:** In `/dashboard`, links to `▣ Component Types` (`/dashboard/components`) and `▤ Organizations` (`/dashboard/organizations`) are displayed and accessible.
    - **EDITOR:** Logging in with an email not marked as superadmin will assign `role: EDITOR`. Direct navigation to `/dashboard/components` or `/dashboard/organizations` will be intercepted by `proxy.ts` and redirect back to `/dashboard` with an error message (`Access restricted: Superadmin permission required for this section.`).

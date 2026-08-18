@@ -15,15 +15,17 @@ export default async function OrganizationsListPage() {
 
   const orgIds = organizations.map((o) => o._id);
   const editors = await User.find({
-    organization: { $in: orgIds },
+    organizations: { $in: orgIds },
     role: "EDITOR",
   }).lean();
 
   const editorCountMap: Record<string, number> = {};
   editors.forEach((editor) => {
-    if (editor.organization) {
-      const key = editor.organization.toString();
-      editorCountMap[key] = (editorCountMap[key] || 0) + 1;
+    if (editor.organizations && Array.isArray(editor.organizations)) {
+      editor.organizations.forEach((orgId) => {
+        const key = orgId.toString();
+        editorCountMap[key] = (editorCountMap[key] || 0) + 1;
+      });
     }
   });
 

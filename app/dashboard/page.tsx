@@ -79,7 +79,7 @@ export default async function DashboardPage({
               </div>
             ) : (
               <div className="space-y-4">
-                {!user.organization ? (
+                {!user.organizations || user.organizations.length === 0 ? (
                   <div className="p-4 bg-[var(--color-surface-hover)] border border-[var(--color-warning)]/40 rounded text-xs space-y-2">
                     <div className="font-semibold text-[var(--color-warning)]">
                       [notice] Not yet assigned to an organization
