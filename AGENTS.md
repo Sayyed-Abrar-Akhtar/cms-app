@@ -212,7 +212,15 @@ earned by the content (these are literally field configs), not decoration.
 ## 10. Environment variables
 
 See `.env.example` for the full list and where to get each value
-(MongoDB Atlas, Magic dashboard, Cloudinary dashboard).
+(MongoDB Atlas, Magic dashboard, Cloudinary dashboard, Resend dashboard).
+
+- `MONGODB_URI` — MongoDB Atlas connection string.
+- `SESSION_SECRET` — Min 32-char secret for JWT session cookie signing.
+- `NEXT_PUBLIC_MAGIC_PUBLISHABLE_KEY` & `MAGIC_SECRET_KEY` — Magic SDK auth credentials.
+- `SUPERADMIN_EMAIL` — Initial superadmin email.
+- `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` — Cloudinary image upload configuration.
+- `RESEND_API_KEY` — Resend API key for sending transactional notification emails.
+- `RESEND_FROM_EMAIL` — Sender address (e.g. `RESEND_FROM_EMAIL="CMS <cms@sayyedabrarakhtar.com.np>"`). Note: Domain must be verified in Resend dashboard via DNS records before sending works.
 
 ## 11. Current repo state
 
