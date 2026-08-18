@@ -82,9 +82,9 @@ writing anything new, don't redefine the schema elsewhere):
 - **Organization** — a client account. `type: "COMPANY" | "INDIVIDUAL"`,
   a unique `slug`, and a `publicApiKey` its separate frontend uses to read
   its own content.
-- **User** — `role: "SUPERADMIN" | "EDITOR"`, optional `organization` ref
-  (null for superadmin), `magicIssuer` set on first login to bind the Magic
-  identity to this row.
+- **User** — `role: "SUPERADMIN" | "EDITOR"`, `organizations: Types.ObjectId[]`
+  (array of Organization refs for many-to-many relationship, default empty array),
+  `magicIssuer` set on first login to bind the Magic identity to this row.
 - **ComponentType** — the blueprint. `fields: FieldDefinition[]` is
   **embedded**, not a separate collection, because fields are never queried
   independently of their component type. `isRepeatable` controls whether
@@ -182,10 +182,10 @@ earned by the content (these are literally field configs), not decoration.
 ## 8. Security rules — non-negotiable
 
 - Every mutation (Server Action or Route Handler) re-checks `role` and, for
-  editors, `organization` **server-side** from the session — never trust a
+  editors, `organizations` **server-side** from the session — never trust a
   client-supplied `organizationId` or `role`.
-- An EDITOR's queries/writes are always scoped to their own
-  `organization` — filter server-side, don't rely on the UI hiding other
+- An EDITOR's queries/writes are always scoped to their attached
+  organizations in `organizations` array — filter server-side, don't rely on the UI hiding other
   orgs' data.
 - Session cookie: httpOnly, secure, `sameSite: "lax"`, signed with `jose`
   using `SESSION_SECRET`, reasonably short expiry.

@@ -52,7 +52,7 @@ export async function POST(request: Request) {
       user = await User.create({
         email: cleanEmail,
         role: "EDITOR",
-        organization: null,
+        organizations: [],
         magicIssuer: issuer,
       });
     } else {
@@ -74,7 +74,7 @@ export async function POST(request: Request) {
       userId: user._id.toString(),
       email: user.email,
       role: user.role,
-      organizationId: user.organization ? user.organization.toString() : null,
+      organizationId: user.organizations && user.organizations.length > 0 ? user.organizations[0].toString() : null,
     };
 
     const sessionToken = await createSessionToken(sessionPayload);
