@@ -30,6 +30,7 @@ export type OrganizationInput = z.infer<typeof OrganizationInputSchema>;
 export type ActionResponse<T = unknown> = {
   success: boolean;
   error?: string;
+  message?: string;
   data?: T;
 };
 
@@ -140,26 +141,29 @@ export async function inviteEditorAction(
         };
       }
 
-      if (
-        existingUser.organization &&
-        existingUser.organization.toString() !== org._id.toString()
-      ) {
-        const attachedOrg = await Organization.findById(existingUser.organization);
-        const attachedOrgName = attachedOrg ? attachedOrg.name : "another organization";
+      if (!existingUser.organizations) {
+        existingUser.organizations = [];
+      }
+
+      const isAlreadyAttached = existingUser.organizations.some(
+        (id) => id.toString() === org._id.toString()
+      );
+
+      if (isAlreadyAttached) {
         return {
-          success: false,
-          error: `Conflict: User '${cleanEmail}' is already attached to ${attachedOrgName} (${attachedOrg?.slug || "another org"}). An editor cannot be attached to multiple organizations.`,
+          success: true,
+          message: `User '${cleanEmail}' is already attached to this organization.`,
         };
       }
 
       existingUser.role = "EDITOR";
-      existingUser.organization = org._id;
+      existingUser.organizations.push(org._id);
       await existingUser.save();
     } else {
       await User.create({
         email: cleanEmail,
         role: "EDITOR",
-        organization: org._id,
+        organizations: [org._id],
         magicIssuer: null,
       });
     }
@@ -191,8 +195,10 @@ export async function removeEditorAction(
       return { success: false, error: "User not found." };
     }
 
-    if (user.organization?.toString() === organizationId) {
-      user.organization = null;
+    if (user.organizations && user.organizations.length > 0) {
+      user.organizations = user.organizations.filter(
+        (id) => id.toString() !== organizationId
+      );
       await user.save();
     }
 
