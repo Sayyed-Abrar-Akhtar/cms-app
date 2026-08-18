@@ -25,3 +25,66 @@ body {
   color: var(--color-foreground);
   font-family: var(--font-geist-mono), monospace;
 }
+
+/* Rich text editor (Tiptap) — restricted schema output, AGENTS.md §6.
+   Serif-free, sans body copy inside the monospace chrome. */
+.cms-prose {
+  font-family: var(--font-geist-sans), sans-serif;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--color-foreground);
+  padding: 0.75rem;
+  min-height: 8rem;
+}
+
+.cms-prose h2 {
+  font-size: 1.125rem;
+  font-weight: 700;
+  margin: 0.75rem 0 0.375rem;
+}
+
+.cms-prose h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0.625rem 0 0.25rem;
+}
+
+.cms-prose p {
+  margin: 0.375rem 0;
+}
+
+.cms-prose a {
+  color: var(--color-accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.cms-prose ul {
+  list-style: disc;
+  padding-left: 1.25rem;
+  margin: 0.375rem 0;
+}
+
+.cms-prose ol {
+  list-style: decimal;
+  padding-left: 1.25rem;
+  margin: 0.375rem 0;
+}
+
+.cms-prose blockquote {
+  border-left: 2px solid var(--color-accent);
+  padding-left: 0.75rem;
+  color: var(--color-muted);
+  margin: 0.5rem 0;
+}
+
+.cms-prose img {
+  max-width: 100%;
+  border-radius: 0.375rem;
+  border: 1px solid var(--color-border);
+  margin: 0.5rem 0;
+}
+
+.cms-prose img.ProseMirror-selectednode {
+  outline: 2px solid var(--color-accent);
+}
