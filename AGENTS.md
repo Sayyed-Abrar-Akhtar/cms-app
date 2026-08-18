@@ -218,12 +218,25 @@ Already implemented — read before touching:
 - `lib/field-types.ts` — `FIELD_TYPES` + `FieldDefinition` type, the single
   source of truth for field kinds.
 - `lib/session.ts` — `jose`-based session token sign/verify + cookie
-  options (`SESSION_COOKIE_NAME`, `SESSION_COOKIE_OPTIONS`). Task 1 still
-  needs to wire this into actual login/logout routes and a `getSession()`/
-  `getCurrentUser()` helper — the token layer exists, the auth flow doesn't.
+  options (`SESSION_COOKIE_NAME`, `SESSION_COOKIE_OPTIONS`).
+- `lib/auth.ts` — `getSessionPayload()`, `getCurrentUser()`,
+  `requireSuperadmin()`, `requireEditor()`.
+- `lib/validate-field.ts` — server-side value validation/sanitization per
+  field type, incl. the Tiptap JSON sanitizer and the Cloudinary hostname
+  allowlist. Every write path must go through this.
+- `lib/cloudinary.ts` — signed-upload signature minter (server-only).
 - `models/Organization.ts`, `models/User.ts`, `models/ComponentType.ts`,
   `models/ComponentInstance.ts`.
+- Magic login flow (`app/login`, `app/api/auth/verify`, `app/api/auth/logout`),
+  `proxy.ts` route protection, `scripts/seed-superadmin.ts` (`npm run seed`).
+- Superadmin: Component Type builder (`app/dashboard/components/**`),
+  Organizations & editor invites (`app/dashboard/organizations/**`), and the
+  page builder that assigns/reorders ComponentInstances per org page.
+- Editor dashboard: page list (`app/dashboard/page.tsx`), per-page instance
+  editor (`app/dashboard/[page]/page.tsx` + `app/dashboard/_fields/*`),
+  Cloudinary signed upload (`app/api/cloudinary/sign`), and the org-scoped
+  save Server Action (`app/dashboard/actions.ts`).
 
-Not yet implemented — the Magic login flow, `proxy.ts` route protection,
-both dashboards, Cloudinary upload handling, the Tiptap editor, and the
-public API. See `JULES_BUILD_PLAN.md` for the build order.
+Not yet implemented — repeatable-component add/remove/reorder for editors
+(Task 6), the public read API (Task 7), the design-system pass (Task 8),
+and tests/deploy docs (Task 9). See `JULES_BUILD_PLAN.md`.
