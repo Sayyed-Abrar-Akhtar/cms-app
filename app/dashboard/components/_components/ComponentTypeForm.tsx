@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { FIELD_TYPES, FIELD_TYPE_LABELS, type FieldType, type FieldDefinition } from "@/lib/field-types";
 import { createComponentTypeAction, updateComponentTypeAction } from "../actions";
 import { TerminalWindow } from "@/app/_components/TerminalWindow";
@@ -43,6 +42,7 @@ export function ComponentTypeForm({ initialData, hasInstancesWarning }: Componen
   const router = useRouter();
   const isEditing = Boolean(initialData);
 
+  const [isDirty, setIsDirty] = useState(false);
   const [name, setName] = useState(initialData?.name || "");
   const [slug, setSlug] = useState(initialData?.slug || "");
   const [slugIsCustomized, setSlugIsCustomized] = useState(isEditing);
@@ -86,7 +86,18 @@ export function ComponentTypeForm({ initialData, hasInstancesWarning }: Componen
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const handleNavigateBack = () => {
+    if (isDirty) {
+      const confirmed = window.confirm(
+        "You have unsaved changes. Are you sure you want to leave?"
+      );
+      if (!confirmed) return;
+    }
+    router.push("/dashboard/components");
+  };
+
   const handleNameChange = (val: string) => {
+    setIsDirty(true);
     setName(val);
     if (!slugIsCustomized) {
       setSlug(generateSlug(val));
@@ -94,11 +105,23 @@ export function ComponentTypeForm({ initialData, hasInstancesWarning }: Componen
   };
 
   const handleSlugChange = (val: string) => {
+    setIsDirty(true);
     setSlugIsCustomized(true);
     setSlug(val.toLowerCase().replace(/[^a-z0-9-]/g, ""));
   };
 
+  const handleDescriptionChange = (val: string) => {
+    setIsDirty(true);
+    setDescription(val);
+  };
+
+  const handleIsRepeatableChange = (val: boolean) => {
+    setIsDirty(true);
+    setIsRepeatable(val);
+  };
+
   const addFieldRow = () => {
+    setIsDirty(true);
     setFieldRows((prev) => [
       ...prev,
       {
@@ -115,6 +138,7 @@ export function ComponentTypeForm({ initialData, hasInstancesWarning }: Componen
   };
 
   const removeFieldRow = (id: string) => {
+    setIsDirty(true);
     setFieldRows((prev) => prev.filter((row) => row.id !== id));
   };
 
@@ -123,6 +147,7 @@ export function ComponentTypeForm({ initialData, hasInstancesWarning }: Componen
     if (direction === "down" && index === fieldRows.length - 1) return;
     const targetIdx = direction === "up" ? index - 1 : index + 1;
 
+    setIsDirty(true);
     setFieldRows((prev) => {
       const next = [...prev];
       const temp = next[index];
@@ -133,6 +158,7 @@ export function ComponentTypeForm({ initialData, hasInstancesWarning }: Componen
   };
 
   const updateFieldRow = (id: string, updates: Partial<EditableFieldRow>) => {
+    setIsDirty(true);
     setFieldRows((prev) =>
       prev.map((row) => {
         if (row.id !== id) return row;
@@ -204,6 +230,7 @@ export function ComponentTypeForm({ initialData, hasInstancesWarning }: Componen
         return;
       }
 
+      setIsDirty(false);
       router.push("/dashboard/components");
       router.refresh();
     } catch (err) {
@@ -223,19 +250,20 @@ export function ComponentTypeForm({ initialData, hasInstancesWarning }: Componen
       <div className="max-w-4xl mx-auto space-y-6">
         <TerminalWindow
           title={windowTitle}
-          redirectUrl="/dashboard/components"
+          onClose={handleNavigateBack}
           defaultMaxWidth="max-w-4xl"
         >
           <form onSubmit={handleSubmit} className="p-6 space-y-6">
             <div className="flex items-center justify-between border-b border-[var(--color-border)] pb-4">
               <div>
                 <div className="flex items-center gap-2">
-                  <Link
-                    href="/dashboard/components"
-                    className="text-xs text-[var(--color-muted)] hover:text-[var(--color-foreground)] transition-colors"
+                  <button
+                    type="button"
+                    onClick={handleNavigateBack}
+                    className="text-xs text-[var(--color-muted)] hover:text-[var(--color-foreground)] transition-colors cursor-pointer"
                   >
                     ← components
-                  </Link>
+                  </button>
                   <span className="text-xs text-[var(--color-muted)]">/</span>
                   <span className="text-xs text-[var(--color-accent)]">
                     {isEditing ? initialData?.slug : "new"}
@@ -247,12 +275,13 @@ export function ComponentTypeForm({ initialData, hasInstancesWarning }: Componen
               </div>
 
               <div className="flex items-center gap-3">
-                <Link
-                  href="/dashboard/components"
-                  className="py-1.5 px-3 bg-[var(--color-surface-hover)] border border-[var(--color-border)] rounded text-xs text-[var(--color-foreground)] hover:bg-[var(--color-border)] transition-colors"
+                <button
+                  type="button"
+                  onClick={handleNavigateBack}
+                  className="py-1.5 px-3 bg-[var(--color-surface-hover)] border border-[var(--color-border)] rounded text-xs text-[var(--color-foreground)] hover:bg-[var(--color-border)] transition-colors cursor-pointer"
                 >
                   Cancel
-                </Link>
+                </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
@@ -329,7 +358,7 @@ export function ComponentTypeForm({ initialData, hasInstancesWarning }: Componen
                 <textarea
                   rows={2}
                   value={description}
-                  onChange={(e) => setDescription(e.target.value)}
+                  onChange={(e) => handleDescriptionChange(e.target.value)}
                   placeholder="Describe the purpose of this component type..."
                   className="w-full bg-[var(--color-background)] border border-[var(--color-border)] rounded px-3 py-1.5 text-xs text-[var(--color-foreground)] focus:outline-none focus:border-[var(--color-accent)] font-sans"
                 />
@@ -340,7 +369,7 @@ export function ComponentTypeForm({ initialData, hasInstancesWarning }: Componen
                   <input
                     type="checkbox"
                     checked={isRepeatable}
-                    onChange={(e) => setIsRepeatable(e.target.checked)}
+                    onChange={(e) => handleIsRepeatableChange(e.target.checked)}
                     className="sr-only peer"
                   />
                   <div className="w-9 h-5 bg-[var(--color-border)] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[var(--color-accent)]"></div>
@@ -532,12 +561,13 @@ export function ComponentTypeForm({ initialData, hasInstancesWarning }: Componen
             </div>
 
             <div className="flex justify-end gap-3 pt-4 border-t border-[var(--color-border)]">
-              <Link
-                href="/dashboard/components"
-                className="py-2 px-4 bg-[var(--color-surface-hover)] border border-[var(--color-border)] rounded text-xs text-[var(--color-foreground)] hover:bg-[var(--color-border)] transition-colors"
+              <button
+                type="button"
+                onClick={handleNavigateBack}
+                className="py-2 px-4 bg-[var(--color-surface-hover)] border border-[var(--color-border)] rounded text-xs text-[var(--color-foreground)] hover:bg-[var(--color-border)] transition-colors cursor-pointer"
               >
                 Cancel
-              </Link>
+              </button>
               <button
                 type="submit"
                 disabled={isSubmitting}
