@@ -124,3 +124,167 @@ export async function saveInstanceValuesAction(
     return { success: false, error: "Save failed — try again." };
   }
 }
+
+/**
+ * Allows an editor to add a new instance of a repeatable component type.
+ */
+export async function addRepeatableInstanceAction(
+  orgSlug: string,
+  page: string,
+  componentTypeId: string
+): Promise<ActionResponse> {
+  try {
+    const user = await requireEditor();
+    await connectDB();
+
+    const org = await Organization.findOne({ slug: orgSlug });
+    if (!org) {
+      return { success: false, error: "Organization not found." };
+    }
+
+    if (user.role === "EDITOR") {
+      const userOrgs = user.organizations ?? [];
+      const isMember = userOrgs.some(
+        (orgId) => orgId.toString() === org._id.toString()
+      );
+      if (!isMember) {
+        return { success: false, error: "Unauthorized for this organization." };
+      }
+    }
+
+    const componentType = await ComponentType.findById(componentTypeId);
+    if (!componentType) {
+      return { success: false, error: "Component type not found." };
+    }
+
+    if (!componentType.isRepeatable) {
+      return {
+        success: false,
+        error: "Only repeatable components can be added by editors.",
+      };
+    }
+
+    const lastInstance = await ComponentInstance.findOne({
+      organization: org._id,
+      page,
+    })
+      .sort({ order: -1 })
+      .lean();
+
+    const nextOrder = lastInstance ? lastInstance.order + 1 : 0;
+
+    await ComponentInstance.create({
+      organization: org._id,
+      componentType: componentType._id,
+      page,
+      order: nextOrder,
+      values: [],
+      updatedBy: user.email,
+    });
+
+    revalidatePath(`/dashboard/${org.slug}/${page}`);
+    return { success: true };
+  } catch (err) {
+    if (err instanceof Error) {
+      return { success: false, error: err.message };
+    }
+    return { success: false, error: "Failed to add repeatable component." };
+  }
+}
+
+/**
+ * Allows an editor to remove an instance of a repeatable component type.
+ */
+export async function removeRepeatableInstanceAction(
+  instanceId: string
+): Promise<ActionResponse> {
+  try {
+    const user = await requireEditor();
+    await connectDB();
+
+    const instance = await ComponentInstance.findById(instanceId);
+    if (!instance) {
+      return { success: false, error: "Component instance not found." };
+    }
+
+    if (user.role === "EDITOR") {
+      const userOrgs = user.organizations ?? [];
+      const isMember = userOrgs.some(
+        (orgId) => orgId.toString() === instance.organization.toString()
+      );
+      if (!isMember) {
+        return { success: false, error: "Unauthorized for this organization." };
+      }
+    }
+
+    const componentType = await ComponentType.findById(instance.componentType);
+    if (!componentType || !componentType.isRepeatable) {
+      return {
+        success: false,
+        error: "Only repeatable components can be removed by editors.",
+      };
+    }
+
+    const org = await Organization.findById(instance.organization).lean();
+    await ComponentInstance.deleteOne({ _id: instanceId });
+
+    if (org) {
+      revalidatePath(`/dashboard/${org.slug}/${instance.page}`);
+    }
+
+    return { success: true };
+  } catch (err) {
+    if (err instanceof Error) {
+      return { success: false, error: err.message };
+    }
+    return { success: false, error: "Failed to remove component instance." };
+  }
+}
+
+/**
+ * Allows an editor to reorder instances on a page.
+ */
+export async function reorderRepeatableInstancesAction(
+  orgSlug: string,
+  page: string,
+  instanceIdsInOrder: string[]
+): Promise<ActionResponse> {
+  try {
+    const user = await requireEditor();
+    await connectDB();
+
+    const org = await Organization.findOne({ slug: orgSlug });
+    if (!org) {
+      return { success: false, error: "Organization not found." };
+    }
+
+    if (user.role === "EDITOR") {
+      const userOrgs = user.organizations ?? [];
+      const isMember = userOrgs.some(
+        (orgId) => orgId.toString() === org._id.toString()
+      );
+      if (!isMember) {
+        return { success: false, error: "Unauthorized for this organization." };
+      }
+    }
+
+    const bulkOps = instanceIdsInOrder.map((id, index) => ({
+      updateOne: {
+        filter: { _id: id, organization: org._id, page },
+        update: { $set: { order: index } },
+      },
+    }));
+
+    if (bulkOps.length > 0) {
+      await ComponentInstance.bulkWrite(bulkOps);
+    }
+
+    revalidatePath(`/dashboard/${org.slug}/${page}`);
+    return { success: true };
+  } catch (err) {
+    if (err instanceof Error) {
+      return { success: false, error: err.message };
+    }
+    return { success: false, error: "Failed to reorder component instances." };
+  }
+}

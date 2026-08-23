@@ -4,10 +4,11 @@ import { requireEditor, ForbiddenError } from "@/lib/auth";
 import { connectDB } from "@/lib/mongodb";
 import { Organization } from "@/models/Organization";
 import { ComponentInstance } from "@/models/ComponentInstance";
-import type { ComponentTypeDoc } from "@/models/ComponentType";
+import { ComponentType, type ComponentTypeDoc } from "@/models/ComponentType";
 import type { FieldDefinition } from "@/lib/field-types";
 import { TerminalWindow } from "@/app/_components/TerminalWindow";
-import { InstanceForm, type InstanceData } from "@/app/dashboard/_fields/InstanceForm";
+import { type InstanceData } from "@/app/dashboard/_fields/InstanceForm";
+import { EditorPageClient, type RepeatableTypeOption } from "./EditorPageClient";
 
 export default async function PageEditorPage({
   params,
@@ -52,6 +53,14 @@ export default async function PageEditorPage({
   if (docs.length === 0) {
     notFound();
   }
+
+  // Fetch available repeatable component types
+  const repeatableTypeDocs = await ComponentType.find({ isRepeatable: true }).lean();
+  const repeatableTypes: RepeatableTypeOption[] = repeatableTypeDocs.map((doc) => ({
+    id: String(doc._id),
+    name: doc.name,
+    slug: doc.slug,
+  }));
 
   // Calculate quota info if editor
   let quotaInfo: { remaining: number; quota: number } | null = null;
@@ -124,9 +133,12 @@ export default async function PageEditorPage({
               </Link>
             </div>
 
-            {instances.map((instance) => (
-              <InstanceForm key={instance.id} instance={instance} />
-            ))}
+            <EditorPageClient
+              orgSlug={orgSlug}
+              page={page}
+              instances={instances}
+              repeatableTypes={repeatableTypes}
+            />
           </div>
         </TerminalWindow>
       </div>

@@ -25,13 +25,7 @@ There are exactly two roles:
   Card, etc.) with a fixed set of typed fields, creates client
   **Organizations**, invites their editors, and assigns **Component
   Instances** to an organization's pages.
-- **EDITOR** (a client user, belongs to exactly one Organization): can only
-  fill in/update the **values** of the components already assigned to their
-  org. They cannot create component types, cannot see or touch other orgs'
-  data, and — for non-repeatable components — cannot add/remove/reorder
-  instances. For components marked `isRepeatable`, they *can* add/remove/
-  reorder instances (e.g. "add another project"), but the fields inside each
-  instance are still whatever the component type defines.
+- **EDITOR** (a client user, belongs to one or more Organizations via `organizations: ObjectId[]` array): can fill in/update the **values** of components assigned to their org(s). They cannot create component types, cannot see or touch other orgs' data, and — for non-repeatable components — cannot add/remove/reorder instances. For components marked `isRepeatable`, they *can* add/remove/reorder instances (e.g. "add another project") on their page editor with modal confirmation on deletion, but the fields inside each instance remain defined by the component type.
 
 If a task would let an EDITOR change structure (add a new field, create a
 new component type, edit another org's data), stop and flag it — that's a
@@ -82,9 +76,7 @@ writing anything new, don't redefine the schema elsewhere):
 - **Organization** — a client account. `type: "COMPANY" | "INDIVIDUAL"`,
   a unique `slug`, and a `publicApiKey` its separate frontend uses to read
   its own content.
-- **User** — `role: "SUPERADMIN" | "EDITOR"`, optional `organization` ref
-  (null for superadmin), `magicIssuer` set on first login to bind the Magic
-  identity to this row.
+- **User** — `role: "SUPERADMIN" | "EDITOR"`, `organizations: ObjectId[]` array (formerly single `organization` ref, supporting multi-org editors), `magicIssuer` set on first login to bind the Magic identity to this row.
 - **ComponentType** — the blueprint. `fields: FieldDefinition[]` is
   **embedded**, not a separate collection, because fields are never queried
   independently of their component type. `isRepeatable` controls whether
@@ -224,17 +216,14 @@ See `.env.example` for the full list and where to get each value
 
 ## 11. Current repo state
 
-Already implemented — read before touching:
+Already implemented:
 - `lib/mongodb.ts` — cached Mongoose connection helper.
 - `lib/field-types.ts` — `FIELD_TYPES` + `FieldDefinition` type, the single
-  source of truth for field kinds.
-- `lib/session.ts` — `jose`-based session token sign/verify + cookie
-  options (`SESSION_COOKIE_NAME`, `SESSION_COOKIE_OPTIONS`). Task 1 still
-  needs to wire this into actual login/logout routes and a `getSession()`/
-  `getCurrentUser()` helper — the token layer exists, the auth flow doesn't.
-- `models/Organization.ts`, `models/User.ts`, `models/ComponentType.ts`,
-  `models/ComponentInstance.ts`.
-
-Not yet implemented — the Magic login flow, `proxy.ts` route protection,
-both dashboards, Cloudinary upload handling, the Tiptap editor, and the
-public API. See `JULES_BUILD_PLAN.md` for the build order.
+  source of truth for field kinds (9 field types).
+- `lib/session.ts` & `lib/auth.ts` — `jose`-based session cookies, Magic SDK passwordless auth flow (`/login`, `/api/auth/verify`).
+- `proxy.ts` — Next.js middleware replacement for session verification and role-based route protection.
+- `models/Organization.ts`, `models/User.ts`, `models/ComponentType.ts`, `models/ComponentInstance.ts` — supporting multi-organization editors (`organizations: ObjectId[]`).
+- **Superadmin Dashboard** — component type CRUD with Zod validation and domain validation; organization management, public API key regeneration, editor invitation with Resend notification, Page Builder with removal confirmation modal.
+- **Editor Dashboard** — multi-org page navigation, per-organization page editor with all 9 field types, signed Cloudinary image upload, restricted Tiptap rich text editor, update quota enforcement, and repeatable component instance editing (add, remove with modal confirmation, and reorder).
+- **Public Read API** — `/api/public/[orgSlug]/[page]` with `x-api-key` header verification and caching.
+- **Automated Tests** — Unit tests covering invite emails, migration & multi-org editor actions, quota enforcement, Cloudinary/RichText, public read API, and repeatable component editing.
