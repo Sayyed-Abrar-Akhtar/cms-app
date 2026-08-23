@@ -49,6 +49,7 @@ export default async function OrganizationDetailPage({
 
     return {
       id: e._id.toString(),
+      name: e.name ?? null,
       email: e.email,
       updatesUsedInPeriod: used,
       updateQuota: quota,
