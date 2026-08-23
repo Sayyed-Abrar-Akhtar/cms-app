@@ -5,7 +5,6 @@ import { ComponentInstance } from "@/models/ComponentInstance";
 import { notFound } from "next/navigation";
 import { ComponentTypeForm } from "../_components/ComponentTypeForm";
 
-export const revalidate = 0;
 
 export default async function EditComponentTypePage({
   params,

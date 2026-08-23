@@ -7,7 +7,7 @@ import { connectDB } from "@/lib/mongodb";
 import { Organization } from "@/models/Organization";
 import { User } from "@/models/User";
 import { sendEditorInviteEmail } from "@/lib/email";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 
 const OrganizationInputSchema = z.object({
   name: z.string().trim().min(1, "Organization name is required"),
@@ -303,8 +303,7 @@ export async function regenerateApiKeyAction(
     org.publicApiKey = newApiKey;
     await org.save();
 
-    // TODO: Verify that regenerating publicApiKey immediately invalidates the old key once Task 7's public API is implemented.
-
+    revalidateTag(`public-api-${org.slug}`, "max");
     revalidatePath("/dashboard/organizations");
     revalidatePath(`/dashboard/organizations/${org.slug}`);
 

@@ -4,7 +4,6 @@ import { ComponentType } from "@/models/ComponentType";
 import Link from "next/link";
 import { TerminalWindow } from "@/app/_components/TerminalWindow";
 
-export const revalidate = 0;
 
 export default async function ComponentTypesListPage() {
   await requireSuperadmin();

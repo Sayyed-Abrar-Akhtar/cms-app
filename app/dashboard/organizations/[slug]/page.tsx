@@ -12,7 +12,6 @@ import { InviteEditorForm } from "./_components/InviteEditorForm";
 import { EditorList } from "./_components/EditorList";
 import { PageBuilder } from "./_components/PageBuilder";
 
-export const revalidate = 0;
 
 export default async function OrganizationDetailPage({
   params,
