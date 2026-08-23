@@ -5,7 +5,6 @@ import { User } from "@/models/User";
 import Link from "next/link";
 import { TerminalWindow } from "@/app/_components/TerminalWindow";
 
-export const revalidate = 0;
 
 export default async function OrganizationsListPage() {
   await requireSuperadmin();

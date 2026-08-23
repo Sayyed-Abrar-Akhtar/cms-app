@@ -29,7 +29,6 @@ export function ApiKeyCard({ organizationId, initialApiKey, slug }: ApiKeyCardPr
     setIsRegenerating(true);
 
     try {
-      // TODO: Verify that regenerating publicApiKey immediately invalidates the old key once Task 7's public API is implemented.
       const res = await regenerateApiKeyAction(organizationId);
       if (!res.success || !res.data) {
         setError(res.error || "Failed to regenerate API key.");
