@@ -65,7 +65,13 @@ function FieldRenderer({
  * explicit ("Save changes" → "Saved"), one instance at a time, and the
  * Server Action re-checks organization ownership server-side.
  */
-export function InstanceForm({ instance }: { instance: InstanceData }) {
+export function InstanceForm({
+  instance,
+  onDirtyChange,
+}: {
+  instance: InstanceData;
+  onDirtyChange?: (instanceId: string, isDirty: boolean) => void;
+}) {
   const [values, setValues] = useState<Record<string, unknown>>(instance.values);
   const [dirty, setDirty] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -77,6 +83,7 @@ export function InstanceForm({ instance }: { instance: InstanceData }) {
     setDirty(true);
     setSaved(false);
     setError(null);
+    onDirtyChange?.(instance.id, true);
   }
 
   async function handleSave() {
@@ -88,6 +95,7 @@ export function InstanceForm({ instance }: { instance: InstanceData }) {
       if (result.success) {
         setSaved(true);
         setDirty(false);
+        onDirtyChange?.(instance.id, false);
       } else {
         setError(result.error || "Save failed — try again.");
       }

@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { FIELD_TYPES, FIELD_TYPE_LABELS, type FieldType, type FieldDefinition } from "@/lib/field-types";
 import { createComponentTypeAction, updateComponentTypeAction } from "../actions";
 import { TerminalWindow } from "@/app/_components/TerminalWindow";
@@ -85,6 +84,62 @@ export function ComponentTypeForm({ initialData, hasInstancesWarning }: Componen
 
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Compute unsaved changes (isDirty)
+  const initialFieldsNormalized = (
+    initialData?.fields && initialData.fields.length > 0
+      ? initialData.fields
+      : [
+          {
+            key: "headline",
+            label: "Headline",
+            type: "TEXT" as FieldType,
+            required: true,
+            helpText: "",
+            config: {},
+          },
+        ]
+  ).map((f) => {
+    const config = (f.config || {}) as { options?: unknown; maxLength?: unknown };
+    let optionsStr = "";
+    if (Array.isArray(config.options)) {
+      optionsStr = config.options.join(", ");
+    }
+    return {
+      key: f.key,
+      label: f.label,
+      type: f.type,
+      required: Boolean(f.required),
+      helpText: f.helpText || "",
+      selectOptionsStr: optionsStr,
+      maxLengthStr: config.maxLength ? String(config.maxLength) : "",
+    };
+  });
+
+  const currentFieldsNormalized = fieldRows.map((f) => ({
+    key: f.key,
+    label: f.label,
+    type: f.type,
+    required: f.required,
+    helpText: f.helpText || "",
+    selectOptionsStr: f.selectOptionsStr,
+    maxLengthStr: f.maxLengthStr,
+  }));
+
+  const isDirty =
+    name !== (initialData?.name || "") ||
+    slug !== (initialData?.slug || "") ||
+    description !== (initialData?.description || "") ||
+    isRepeatable !== (initialData?.isRepeatable || false) ||
+    JSON.stringify(currentFieldsNormalized) !== JSON.stringify(initialFieldsNormalized);
+
+  const handleNavigateBack = () => {
+    if (isDirty) {
+      const confirmLeave = window.confirm("You have unsaved changes. Are you sure you want to leave?");
+      if (!confirmLeave) return;
+    }
+    router.push("/dashboard/components");
+  };
 
   const handleNameChange = (val: string) => {
     setName(val);
@@ -223,19 +278,20 @@ export function ComponentTypeForm({ initialData, hasInstancesWarning }: Componen
       <div className="max-w-4xl mx-auto space-y-6">
         <TerminalWindow
           title={windowTitle}
-          redirectUrl="/dashboard/components"
+          onClose={handleNavigateBack}
           defaultMaxWidth="max-w-4xl"
         >
           <form onSubmit={handleSubmit} className="p-6 space-y-6">
             <div className="flex items-center justify-between border-b border-[var(--color-border)] pb-4">
               <div>
                 <div className="flex items-center gap-2">
-                  <Link
-                    href="/dashboard/components"
-                    className="text-xs text-[var(--color-muted)] hover:text-[var(--color-foreground)] transition-colors"
+                  <button
+                    type="button"
+                    onClick={handleNavigateBack}
+                    className="text-xs text-[var(--color-muted)] hover:text-[var(--color-foreground)] transition-colors cursor-pointer"
                   >
                     ← components
-                  </Link>
+                  </button>
                   <span className="text-xs text-[var(--color-muted)]">/</span>
                   <span className="text-xs text-[var(--color-accent)]">
                     {isEditing ? initialData?.slug : "new"}
@@ -247,16 +303,17 @@ export function ComponentTypeForm({ initialData, hasInstancesWarning }: Componen
               </div>
 
               <div className="flex items-center gap-3">
-                <Link
-                  href="/dashboard/components"
-                  className="py-1.5 px-3 bg-[var(--color-surface-hover)] border border-[var(--color-border)] rounded text-xs text-[var(--color-foreground)] hover:bg-[var(--color-border)] transition-colors"
+                <button
+                  type="button"
+                  onClick={handleNavigateBack}
+                  className="py-1.5 px-3 bg-[var(--color-surface-hover)] border border-[var(--color-border)] rounded text-xs text-[var(--color-foreground)] hover:bg-[var(--color-border)] transition-colors cursor-pointer"
                 >
                   Cancel
-                </Link>
+                </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="py-1.5 px-4 bg-[var(--color-accent)] text-black font-semibold rounded text-xs hover:bg-[var(--color-accent)]/90 disabled:opacity-50 transition-colors"
+                  className="py-1.5 px-4 bg-[var(--color-accent)] text-black font-semibold rounded text-xs hover:bg-[var(--color-accent)]/90 disabled:opacity-50 transition-colors cursor-pointer"
                 >
                   {isSubmitting
                     ? isEditing
@@ -532,16 +589,17 @@ export function ComponentTypeForm({ initialData, hasInstancesWarning }: Componen
             </div>
 
             <div className="flex justify-end gap-3 pt-4 border-t border-[var(--color-border)]">
-              <Link
-                href="/dashboard/components"
-                className="py-2 px-4 bg-[var(--color-surface-hover)] border border-[var(--color-border)] rounded text-xs text-[var(--color-foreground)] hover:bg-[var(--color-border)] transition-colors"
+              <button
+                type="button"
+                onClick={handleNavigateBack}
+                className="py-2 px-4 bg-[var(--color-surface-hover)] border border-[var(--color-border)] rounded text-xs text-[var(--color-foreground)] hover:bg-[var(--color-border)] transition-colors cursor-pointer"
               >
                 Cancel
-              </Link>
+              </button>
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="py-2 px-6 bg-[var(--color-accent)] text-black font-semibold rounded text-xs hover:bg-[var(--color-accent)]/90 disabled:opacity-50 transition-colors"
+                className="py-2 px-6 bg-[var(--color-accent)] text-black font-semibold rounded text-xs hover:bg-[var(--color-accent)]/90 disabled:opacity-50 transition-colors cursor-pointer"
               >
                 {isSubmitting
                   ? isEditing

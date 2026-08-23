@@ -5,13 +5,7 @@ import { User } from "@/models/User";
 import { ComponentType } from "@/models/ComponentType";
 import { ComponentInstance } from "@/models/ComponentInstance";
 import { notFound } from "next/navigation";
-import Link from "next/link";
-import { TerminalWindow } from "@/app/_components/TerminalWindow";
-import { ApiKeyCard } from "./_components/ApiKeyCard";
-import { InviteEditorForm } from "./_components/InviteEditorForm";
-import { EditorList } from "./_components/EditorList";
-import { PageBuilder } from "./_components/PageBuilder";
-
+import { OrganizationDetailClient } from "./_components/OrganizationDetailClient";
 
 export default async function OrganizationDetailPage({
   params,
@@ -64,7 +58,7 @@ export default async function OrganizationDetailPage({
     id: ct._id.toString(),
     name: ct.name,
     slug: ct.slug,
-    isRepeatable: ct.isRepeatable,
+    isRepeatable: Boolean(ct.isRepeatable),
     fieldsCount: ct.fields?.length || 0,
   }));
 
@@ -92,82 +86,19 @@ export default async function OrganizationDetailPage({
   return (
     <div className="min-h-screen bg-[var(--color-background)] text-[var(--color-foreground)] font-mono p-6">
       <div className="max-w-4xl mx-auto space-y-6">
-        <TerminalWindow
-          title={`~/cms/organizations/${org.slug}`}
-          redirectUrl="/dashboard/organizations"
-          defaultMaxWidth="max-w-4xl"
-        >
-          <div className="p-6 space-y-6">
-            {/* Header / Breadcrumb */}
-            <div className="border-b border-[var(--color-border)] pb-4">
-              <div className="flex items-center gap-2">
-                <Link
-                  href="/dashboard"
-                  className="text-xs text-[var(--color-muted)] hover:text-[var(--color-foreground)] transition-colors"
-                >
-                  ← dashboard
-                </Link>
-                <span className="text-xs text-[var(--color-muted)]">/</span>
-                <Link
-                  href="/dashboard/organizations"
-                  className="text-xs text-[var(--color-muted)] hover:text-[var(--color-foreground)] transition-colors"
-                >
-                  organizations
-                </Link>
-                <span className="text-xs text-[var(--color-muted)]">/</span>
-                <span className="text-xs text-[var(--color-accent)]">{org.slug}</span>
-              </div>
-
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mt-2">
-                <div>
-                  <div className="flex items-center gap-3">
-                    <h1 className="text-xl font-bold text-[var(--color-foreground)]">
-                      {org.name}
-                    </h1>
-                    <span
-                      className={`px-2 py-0.5 text-[10px] uppercase font-bold tracking-wider rounded border ${
-                        org.type === "COMPANY"
-                          ? "bg-[var(--color-accent-dim)] text-[var(--color-accent)] border-[var(--color-accent)]/30"
-                          : "bg-purple-950/40 text-purple-300 border-purple-800/40"
-                      }`}
-                    >
-                      {org.type}
-                    </span>
-                  </div>
-
-                  <div className="text-xs text-[var(--color-muted)] mt-1 space-x-4">
-                    <span>
-                      slug: <span className="text-[var(--color-foreground)]">{org.slug}</span>
-                    </span>
-                    <span>
-                      owner: <span className="text-[var(--color-foreground)]">{org.ownerEmail}</span>
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Page Builder Section */}
-            <PageBuilder
-              organizationId={orgIdStr}
-              componentTypes={serializedComponentTypes}
-              instances={serializedInstances}
-            />
-
-            {/* Public API Key Card */}
-            <ApiKeyCard
-              organizationId={orgIdStr}
-              initialApiKey={org.publicApiKey}
-              slug={org.slug}
-            />
-
-            {/* Editor List Section */}
-            <EditorList organizationId={orgIdStr} editors={serializedEditors} />
-
-            {/* Invite Editor Form Section */}
-            <InviteEditorForm organizationId={orgIdStr} />
-          </div>
-        </TerminalWindow>
+        <OrganizationDetailClient
+          org={{
+            id: orgIdStr,
+            name: org.name,
+            slug: org.slug,
+            type: org.type,
+            ownerEmail: org.ownerEmail,
+            publicApiKey: org.publicApiKey,
+          }}
+          editors={serializedEditors}
+          componentTypes={serializedComponentTypes}
+          instances={serializedInstances}
+        />
       </div>
     </div>
   );

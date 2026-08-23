@@ -16,7 +16,13 @@ function slugify(text: string): string {
     .replace(/^-+|-+$/g, "");
 }
 
-export function NewOrganizationForm() {
+export function NewOrganizationForm({
+  onDirtyChange,
+  onCancel,
+}: {
+  onDirtyChange?: (isDirty: boolean) => void;
+  onCancel?: () => void;
+}) {
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
   const [autoSlug, setAutoSlug] = useState(true);
@@ -36,11 +42,19 @@ export function NewOrganizationForm() {
     if (autoSlug) {
       setSlug(slugify(val));
     }
+    onDirtyChange?.(Boolean(val.trim() || ownerEmail.trim()));
   };
 
   const handleSlugChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setAutoSlug(false);
     setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""));
+    onDirtyChange?.(true);
+  };
+
+  const handleOwnerEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setOwnerEmail(val);
+    onDirtyChange?.(Boolean(name.trim() || val.trim()));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -60,6 +74,7 @@ export function NewOrganizationForm() {
         setError(res.error || "Failed to create organization.");
       } else if (res.data) {
         setCreatedOrg(res.data);
+        onDirtyChange?.(false);
       }
     } catch {
       setError("An unexpected error occurred while creating the organization.");
@@ -218,7 +233,7 @@ export function NewOrganizationForm() {
             type="email"
             required
             value={ownerEmail}
-            onChange={(e) => setOwnerEmail(e.target.value)}
+            onChange={handleOwnerEmailChange}
             placeholder="e.g. owner@acme.com"
             className="w-full p-2.5 bg-[var(--color-surface-hover)] border border-[var(--color-border)] rounded text-xs text-[var(--color-foreground)] focus:outline-none focus:border-[var(--color-accent)] font-mono"
           />
@@ -232,16 +247,26 @@ export function NewOrganizationForm() {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="py-2.5 px-5 bg-[var(--color-accent)] text-black font-bold rounded text-xs hover:bg-[var(--color-accent)]/90 transition-colors disabled:opacity-50"
+          className="py-2.5 px-5 bg-[var(--color-accent)] text-black font-bold rounded text-xs hover:bg-[var(--color-accent)]/90 transition-colors disabled:opacity-50 cursor-pointer"
         >
           {isSubmitting ? "Creating..." : "Create organization"}
         </button>
-        <Link
-          href="/dashboard/organizations"
-          className="py-2.5 px-4 bg-[var(--color-surface-hover)] hover:bg-[var(--color-border)] border border-[var(--color-border)] text-[var(--color-foreground)] font-semibold rounded text-xs transition-colors"
-        >
-          Cancel
-        </Link>
+        {onCancel ? (
+          <button
+            type="button"
+            onClick={onCancel}
+            className="py-2.5 px-4 bg-[var(--color-surface-hover)] hover:bg-[var(--color-border)] border border-[var(--color-border)] text-[var(--color-foreground)] font-semibold rounded text-xs transition-colors cursor-pointer"
+          >
+            Cancel
+          </button>
+        ) : (
+          <Link
+            href="/dashboard/organizations"
+            className="py-2.5 px-4 bg-[var(--color-surface-hover)] hover:bg-[var(--color-border)] border border-[var(--color-border)] text-[var(--color-foreground)] font-semibold rounded text-xs transition-colors"
+          >
+            Cancel
+          </Link>
+        )}
       </div>
     </form>
   );

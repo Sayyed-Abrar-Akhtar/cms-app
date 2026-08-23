@@ -1,0 +1,13 @@
+
+> cms-app@0.1.0 dev /app
+> next dev
+
+▲ Next.js 16.3.1 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.0.2:3000
+✓ Ready in 614ms
+✓ Running next.config.ts took 57ms
+- Cache Components enabled
+
+○ Compiling / ...
+ GET / 200 in 5.2s (next.js: 4.5s, application-code: 707ms)
