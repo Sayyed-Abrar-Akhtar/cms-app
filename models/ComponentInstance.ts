@@ -1,4 +1,5 @@
 import { Schema, model, models, type Document, type Model, Types } from "mongoose";
+import "@/models/ComponentType";
 
 export interface FieldValueEntry {
   key: string; // matches FieldDefinition.key on the parent ComponentType
