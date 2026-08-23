@@ -65,12 +65,13 @@ describe("Transactional Email & Editor Invite Notification Tests", () => {
     mockSend.mockReset();
   });
 
-  it("sendEditorInviteEmail helper sends email via Resend SDK with subject containing org name", async () => {
+  it("sendEditorInviteEmail helper sends email via Resend SDK with subject containing org name and greeting", async () => {
     mockSend.mockResolvedValueOnce({ data: { id: "msg_123" }, error: null });
 
     const result = await sendEditorInviteEmail({
       to: "editor@test.com",
       organizationName: "Acme Corp",
+      name: "Alice Smith",
     });
 
     expect(result.success).toBe(true);
@@ -80,6 +81,97 @@ describe("Transactional Email & Editor Invite Notification Tests", () => {
         from: "CMS <cms@sayyedabrarakhtar.com.np>",
         to: "editor@test.com",
         subject: "You've been added to Acme Corp",
+        html: expect.stringContaining("<h2>Hi Alice Smith,</h2>"),
+        text: expect.stringContaining("Hi Alice Smith,"),
+      })
+    );
+  });
+
+  it("sendEditorInviteEmail falls back to generic greeting when name is absent or blank", async () => {
+    mockSend.mockResolvedValueOnce({ data: { id: "msg_124" }, error: null });
+
+    const result = await sendEditorInviteEmail({
+      to: "editor2@test.com",
+      organizationName: "Beta Corp",
+      name: "   ",
+    });
+
+    expect(result.success).toBe(true);
+    expect(mockSend).toHaveBeenCalledWith(
+      expect.objectContaining({
+        html: expect.stringContaining("<h2>You've been invited to Beta Corp</h2>"),
+        text: expect.stringContaining("You've been invited to Beta Corp"),
+      })
+    );
+    expect(mockSend).not.toHaveBeenCalledWith(
+      expect.objectContaining({
+        html: expect.stringContaining("Hi ,"),
+      })
+    );
+  });
+
+  it("invites a new editor with a name, saving name to User doc and including greeting in email", async () => {
+    mockSend.mockResolvedValueOnce({ data: { id: "msg_125" }, error: null });
+
+    const org = await Organization.create({
+      name: "Pym Tech",
+      slug: "pym-tech",
+      type: "COMPANY",
+      ownerEmail: "hank@pym.com",
+    });
+
+    const res = await inviteEditorAction(org._id.toString(), "hope@pym.com", "Hope van Dyne");
+
+    expect(res.success).toBe(true);
+    const user = await User.findOne({ email: "hope@pym.com" });
+    expect(user).not.toBeNull();
+    expect(user?.name).toBe("Hope van Dyne");
+
+    expect(mockSend).toHaveBeenCalledWith(
+      expect.objectContaining({
+        to: "hope@pym.com",
+        html: expect.stringContaining("<h2>Hi Hope van Dyne,</h2>"),
+      })
+    );
+  });
+
+  it("attaching existing editor to a second org with blank name doesn't erase saved name", async () => {
+    mockSend.mockResolvedValue({ data: { id: "msg_126" }, error: null });
+
+    const org1 = await Organization.create({
+      name: "Org One",
+      slug: "org-one",
+      type: "COMPANY",
+      ownerEmail: "owner1@org.com",
+    });
+
+    const org2 = await Organization.create({
+      name: "Org Two",
+      slug: "org-two",
+      type: "COMPANY",
+      ownerEmail: "owner2@org.com",
+    });
+
+    // First invite with name
+    await inviteEditorAction(org1._id.toString(), "shared@editor.com", "Carol Danvers");
+    let user = await User.findOne({ email: "shared@editor.com" });
+    expect(user?.name).toBe("Carol Danvers");
+
+    mockSend.mockReset();
+    mockSend.mockResolvedValueOnce({ data: { id: "msg_127" }, error: null });
+
+    // Second invite to org2 with empty name
+    const res2 = await inviteEditorAction(org2._id.toString(), "shared@editor.com", "");
+
+    expect(res2.success).toBe(true);
+    user = await User.findOne({ email: "shared@editor.com" });
+    expect(user?.name).toBe("Carol Danvers"); // Name retained!
+    expect(user?.organizations).toHaveLength(2);
+
+    expect(mockSend).toHaveBeenCalledWith(
+      expect.objectContaining({
+        to: "shared@editor.com",
+        html: expect.stringContaining("<h2>Hi Carol Danvers,</h2>"),
       })
     );
   });

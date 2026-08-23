@@ -4,6 +4,7 @@ export type Role = "SUPERADMIN" | "EDITOR";
 
 export interface UserDoc extends Document {
   email: string;
+  name?: string | null;
   role: Role;
   organizations: Types.ObjectId[];
   magicIssuer?: string | null; // Magic's stable per-user DID, set on first login
@@ -15,6 +16,7 @@ export interface UserDoc extends Document {
 
 const UserSchema = new Schema<UserDoc>({
   email: { type: String, required: true, unique: true, lowercase: true, trim: true },
+  name: { type: String, trim: true, default: null },
   role: { type: String, enum: ["SUPERADMIN", "EDITOR"], default: "EDITOR" },
   organizations: [{ type: Schema.Types.ObjectId, ref: "Organization" }],
   magicIssuer: { type: String, unique: true, sparse: true, default: null },

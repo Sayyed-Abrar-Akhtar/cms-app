@@ -1,13 +1,17 @@
 "use client";
 
 import { useState } from "react";
+import { z } from "zod";
 import { inviteEditorAction } from "@/app/dashboard/organizations/actions";
 
 interface InviteEditorFormProps {
   organizationId: string;
 }
 
+const OptionalNameSchema = z.string().trim().optional();
+
 export function InviteEditorForm({ organizationId }: InviteEditorFormProps) {
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -22,19 +26,26 @@ export function InviteEditorForm({ organizationId }: InviteEditorFormProps) {
     setIsSubmitting(true);
 
     try {
-      const res = await inviteEditorAction(organizationId, email);
+      const parsedName = OptionalNameSchema.parse(name);
+      const res = await inviteEditorAction(organizationId, email, parsedName);
       if (!res.success) {
         setError(res.error || "Failed to invite editor.");
       } else if (res.warning) {
         setWarningMsg(res.warning);
         setEmail("");
+        setName("");
       } else {
         setSuccessMsg(res.message || `Editor '${email.trim().toLowerCase()}' invited successfully.`);
         setEmail("");
+        setName("");
         setTimeout(() => setSuccessMsg(null), 4000);
       }
-    } catch {
-      setError("An unexpected error occurred while inviting editor.");
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        setError(err.issues[0]?.message || "Invalid input.");
+      } else {
+        setError("An unexpected error occurred while inviting editor.");
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -70,6 +81,20 @@ export function InviteEditorForm({ organizationId }: InviteEditorFormProps) {
       )}
 
       <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+        <div className="flex-1">
+          <label htmlFor="editor-name" className="sr-only">
+            Editor Name
+          </label>
+          <input
+            id="editor-name"
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Name (optional)"
+            className="w-full p-2.5 bg-[var(--color-background)] border border-[var(--color-border)] rounded text-xs text-[var(--color-foreground)] focus:outline-none focus:border-[var(--color-accent)] font-mono"
+          />
+        </div>
+
         <div className="flex-1">
           <label htmlFor="editor-email" className="sr-only">
             Editor Email

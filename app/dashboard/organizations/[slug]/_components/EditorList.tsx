@@ -5,6 +5,7 @@ import { removeEditorAction, resetEditorQuotaAction } from "@/app/dashboard/orga
 
 interface EditorItem {
   id: string;
+  name?: string | null;
   email: string;
   updatesUsedInPeriod?: number;
   updateQuota?: number;
@@ -95,8 +96,13 @@ export function EditorList({ organizationId, editors }: EditorListProps) {
               >
                 <div className="space-y-0.5">
                   <div className="font-bold text-[var(--color-foreground)]">
-                    {editor.email}
+                    {editor.name ? editor.name : editor.email}
                   </div>
+                  {editor.name && (
+                    <div className="text-[10px] text-[var(--color-muted)]">
+                      {editor.email}
+                    </div>
+                  )}
                   <div className="text-[10px] text-[var(--color-muted)]">
                     Attached: {new Date(editor.createdAt).toLocaleDateString()}
                   </div>

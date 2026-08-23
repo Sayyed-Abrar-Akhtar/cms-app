@@ -107,17 +107,19 @@ const InviteEditorSchema = z.object({
     .trim()
     .min(1, "Editor email is required")
     .email("Invalid editor email address"),
+  name: z.string().trim().optional(),
 });
 
 export async function inviteEditorAction(
   organizationId: string,
-  email: string
+  email: string,
+  name?: string
 ): Promise<ActionResponse> {
   try {
     await requireSuperadmin();
     await connectDB();
 
-    const parsed = InviteEditorSchema.safeParse({ organizationId, email });
+    const parsed = InviteEditorSchema.safeParse({ organizationId, email, name });
     if (!parsed.success) {
       const firstIssue = parsed.error.issues[0];
       return {
@@ -127,6 +129,10 @@ export async function inviteEditorAction(
     }
 
     const cleanEmail = email.trim().toLowerCase();
+    const cleanName =
+      parsed.data.name && parsed.data.name.trim().length > 0
+        ? parsed.data.name.trim()
+        : undefined;
 
     const org = await Organization.findById(organizationId);
     if (!org) {
@@ -134,6 +140,8 @@ export async function inviteEditorAction(
     }
 
     const existingUser = await User.findOne({ email: cleanEmail });
+
+    let recipientName: string | undefined = cleanName;
 
     if (existingUser) {
       if (existingUser.role === "SUPERADMIN") {
@@ -158,12 +166,19 @@ export async function inviteEditorAction(
         };
       }
 
+      if (!existingUser.name && cleanName) {
+        existingUser.name = cleanName;
+      }
+
+      recipientName = existingUser.name || cleanName;
+
       existingUser.role = "EDITOR";
       existingUser.organizations.push(org._id);
       await existingUser.save();
     } else {
       await User.create({
         email: cleanEmail,
+        name: cleanName || null,
         role: "EDITOR",
         organizations: [org._id],
         magicIssuer: null,
@@ -177,6 +192,7 @@ export async function inviteEditorAction(
     const emailResult = await sendEditorInviteEmail({
       to: cleanEmail,
       organizationName: org.name,
+      name: recipientName,
     });
 
     if (!emailResult.success) {

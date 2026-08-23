@@ -3,6 +3,7 @@ import { Resend } from "resend";
 interface SendEditorInviteEmailOptions {
   to: string;
   organizationName: string;
+  name?: string;
 }
 
 export type SendEmailResult = {
@@ -13,6 +14,7 @@ export type SendEmailResult = {
 export async function sendEditorInviteEmail({
   to,
   organizationName,
+  name,
 }: SendEditorInviteEmailOptions): Promise<SendEmailResult> {
   const apiKey = process.env.RESEND_API_KEY;
   const from = process.env.RESEND_FROM_EMAIL || "CMS <cms@sayyedabrarakhtar.com.np>";
@@ -27,9 +29,14 @@ export async function sendEditorInviteEmail({
     const resend = new Resend(apiKey);
     const subject = `You've been added to ${organizationName}`;
 
+    const cleanName = name?.trim();
+    const greeting = cleanName
+      ? `Hi ${cleanName},`
+      : `You've been invited to ${organizationName}`;
+
     const html = `
       <div style="font-family: sans-serif; line-height: 1.5; color: #111;">
-        <h2>You've been invited to ${organizationName}</h2>
+        <h2>${greeting}</h2>
         <p>You have been added as an editor for <strong>${organizationName}</strong> on the CMS.</p>
         <p>You can log in to your dashboard to start managing content:</p>
         <p><a href="https://cms.sayyedabrarakhtar.com.np/login" style="color: #0066cc;">Log in to CMS Dashboard</a></p>
@@ -38,7 +45,7 @@ export async function sendEditorInviteEmail({
       </div>
     `.trim();
 
-    const text = `You've been added to ${organizationName}
+    const text = `${greeting}
 
 You have been added as an editor for ${organizationName} on the CMS.
 
