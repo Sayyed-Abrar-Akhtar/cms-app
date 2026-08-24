@@ -189,6 +189,7 @@ earned by the content (these are literally field configs), not decoration.
   only returns data for the org the key belongs to.
 - Validate image/URL hostnames server-side on every write, regardless of
   what `next.config.ts` restricts for rendering.
+- New unauthenticated or lightly-authenticated routes should default to rate-limited using `@upstash/ratelimit` unless there's a specific reason not to.
 
 ## 9. Conventions
 
@@ -213,6 +214,7 @@ See `.env.example` for the full list and where to get each value
 - `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` — Cloudinary image upload configuration.
 - `RESEND_API_KEY` — Resend API key for sending transactional notification emails.
 - `RESEND_FROM_EMAIL` — Sender address (e.g. `RESEND_FROM_EMAIL="CMS <cms@sayyedabrarakhtar.com.np>"`). Note: Domain must be verified in Resend dashboard via DNS records before sending works.
+- `UPSTASH_REDIS_REST_URL` & `UPSTASH_REDIS_REST_TOKEN` — Upstash Redis database REST credentials for `@upstash/ratelimit` distributed route rate limiting.
 
 ## 11. Current repo state
 
