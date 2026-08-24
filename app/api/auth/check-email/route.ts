@@ -1,8 +1,15 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import { User } from "@/models/User";
+import { checkRateLimit, getClientIp, rateLimitExceededResponse } from "@/lib/rate-limit";
 
 export async function POST(request: Request) {
+  const ip = getClientIp(request);
+  const rlResult = await checkRateLimit(`check-email:${ip}`);
+  if (!rlResult.success) {
+    return rateLimitExceededResponse(rlResult);
+  }
+
   try {
     const body = await request.json().catch(() => ({}));
     const { email } = body;

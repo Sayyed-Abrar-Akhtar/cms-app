@@ -46,6 +46,7 @@ import { cacheLife, cacheTag } from "next/cache";
 import { connectDB } from "@/lib/mongodb";
 import { Organization } from "@/models/Organization";
 import { ComponentInstance } from "@/models/ComponentInstance";
+import { checkRateLimit, getClientIp, rateLimitExceededResponse } from "@/lib/rate-limit";
 // Ensure ComponentType model is registered for populate
 import "@/models/ComponentType";
 
@@ -131,12 +132,17 @@ type RouteContext = {
 };
 
 export async function GET(request: Request, context: RouteContext) {
+  const { orgSlug, page } = await context.params;
+  const ip = getClientIp(request);
+  const rlResult = await checkRateLimit(`public-api:${orgSlug}:${ip}`);
+  if (!rlResult.success) {
+    return rateLimitExceededResponse(rlResult);
+  }
+
   const apiKey = request.headers.get("x-api-key");
   if (!apiKey) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-
-  const { orgSlug, page } = await context.params;
 
   const data = await getCachedPageData(orgSlug, page);
 

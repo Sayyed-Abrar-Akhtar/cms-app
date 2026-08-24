@@ -4,6 +4,7 @@ import { Magic } from "@magic-sdk/admin";
 import { connectDB } from "@/lib/mongodb";
 import { createSessionToken, SESSION_COOKIE_NAME, SESSION_COOKIE_OPTIONS } from "@/lib/session";
 import { User } from "@/models/User";
+import { checkRateLimit, getClientIp, rateLimitExceededResponse } from "@/lib/rate-limit";
 
 const magicSecretKey = process.env.MAGIC_SECRET_KEY;
 if (!magicSecretKey) {
@@ -12,6 +13,12 @@ if (!magicSecretKey) {
 const magic = new Magic(magicSecretKey || "dummy_secret_key_for_build");
 
 export async function POST(request: Request) {
+  const ip = getClientIp(request);
+  const rlResult = await checkRateLimit(`verify:${ip}`);
+  if (!rlResult.success) {
+    return rateLimitExceededResponse(rlResult);
+  }
+
   try {
     const authHeader = request.headers.get("Authorization");
     let didToken: string | null = null;
