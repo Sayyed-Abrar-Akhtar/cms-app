@@ -63,13 +63,13 @@ export function InviteEditorForm({ organizationId }: InviteEditorFormProps) {
       </div>
 
       {error && (
-        <div className="p-3 bg-red-950/40 border border-[var(--color-danger)]/50 rounded text-xs text-[var(--color-danger)]">
-          [conflict/error] {error}
+        <div className="p-3 bg-[var(--color-surface-hover)] border border-[var(--color-danger)]/50 rounded text-xs text-[var(--color-danger)]">
+          [error] {error}
         </div>
       )}
 
       {warningMsg && (
-        <div className="p-3 bg-amber-950/40 border border-[var(--color-warning)]/50 rounded text-xs text-[var(--color-warning)]">
+        <div className="p-3 bg-[var(--color-surface-hover)] border border-[var(--color-warning)]/50 rounded text-xs text-[var(--color-warning)]">
           [warning] {warningMsg}
         </div>
       )}

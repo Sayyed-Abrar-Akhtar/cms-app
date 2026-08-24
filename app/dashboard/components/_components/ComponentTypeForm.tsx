@@ -310,7 +310,7 @@ export function ComponentTypeForm({ initialData, hasInstancesWarning }: Componen
             )}
 
             {error && (
-              <div className="p-3 bg-red-950/30 border border-[var(--color-danger)]/40 rounded text-xs text-[var(--color-danger)] font-mono">
+              <div className="p-3 bg-[var(--color-surface-hover)] border border-[var(--color-danger)]/40 rounded text-xs text-[var(--color-danger)] font-mono">
                 [error] {error}
               </div>
             )}
@@ -372,7 +372,7 @@ export function ComponentTypeForm({ initialData, hasInstancesWarning }: Componen
                     onChange={(e) => handleIsRepeatableChange(e.target.checked)}
                     className="sr-only peer"
                   />
-                  <div className="w-9 h-5 bg-[var(--color-border)] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[var(--color-accent)]"></div>
+                  <div className="w-9 h-5 bg-[var(--color-border)] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-[var(--color-border)] after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[var(--color-accent)]"></div>
                   <span className="ml-3 text-xs font-semibold text-[var(--color-foreground)]">
                     Repeatable Component
                   </span>
@@ -424,8 +424,9 @@ export function ComponentTypeForm({ initialData, hasInstancesWarning }: Componen
                             type="button"
                             disabled={index === 0}
                             onClick={() => moveFieldRow(index, "up")}
-                            className="p-1 text-xs text-[var(--color-muted)] hover:text-[var(--color-foreground)] disabled:opacity-30"
-                            title="Move up"
+                            className="p-1 text-xs text-[var(--color-muted)] hover:text-[var(--color-foreground)] disabled:opacity-30 focus:outline-none focus-visible:ring-1 focus-visible:ring-white/40 rounded"
+                            title="Move field up"
+                            aria-label="Move field up"
                           >
                             ↑
                           </button>
@@ -433,8 +434,9 @@ export function ComponentTypeForm({ initialData, hasInstancesWarning }: Componen
                             type="button"
                             disabled={index === fieldRows.length - 1}
                             onClick={() => moveFieldRow(index, "down")}
-                            className="p-1 text-xs text-[var(--color-muted)] hover:text-[var(--color-foreground)] disabled:opacity-30"
-                            title="Move down"
+                            className="p-1 text-xs text-[var(--color-muted)] hover:text-[var(--color-foreground)] disabled:opacity-30 focus:outline-none focus-visible:ring-1 focus-visible:ring-white/40 rounded"
+                            title="Move field down"
+                            aria-label="Move field down"
                           >
                             ↓
                           </button>

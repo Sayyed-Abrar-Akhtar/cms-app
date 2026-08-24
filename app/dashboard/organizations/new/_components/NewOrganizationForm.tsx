@@ -192,7 +192,7 @@ export function NewOrganizationForm() {
         ) : (
           <form onSubmit={handleSubmit} className="space-y-6 font-mono text-xs">
             {error && (
-              <div className="p-3 bg-red-950/40 border border-[var(--color-danger)]/50 rounded text-xs text-[var(--color-danger)]">
+              <div className="p-3 bg-[var(--color-surface-hover)] border border-[var(--color-danger)]/50 rounded text-xs text-[var(--color-danger)]">
                 [error] {error}
               </div>
             )}
