@@ -97,7 +97,8 @@ export function RichTextField({ field, value, onChange }: FieldProps) {
             <button
               type="button"
               onClick={() => editor.chain().focus().toggleBold().run()}
-              className={`rounded px-2 py-1 transition-colors ${
+              aria-label="Format bold text"
+              className={`rounded px-2 py-1 transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-accent)] ${
                 editor.isActive("bold")
                   ? "bg-[var(--color-accent-dim)] text-[var(--color-accent)] font-bold"
                   : "bg-[var(--color-surface)] text-[var(--color-foreground)] hover:bg-[var(--color-surface-hover)]"
@@ -110,7 +111,8 @@ export function RichTextField({ field, value, onChange }: FieldProps) {
             <button
               type="button"
               onClick={() => editor.chain().focus().toggleItalic().run()}
-              className={`rounded px-2 py-1 italic transition-colors ${
+              aria-label="Format italic text"
+              className={`rounded px-2 py-1 italic transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-accent)] ${
                 editor.isActive("italic")
                   ? "bg-[var(--color-accent-dim)] text-[var(--color-accent)] font-bold"
                   : "bg-[var(--color-surface)] text-[var(--color-foreground)] hover:bg-[var(--color-surface-hover)]"
@@ -123,7 +125,8 @@ export function RichTextField({ field, value, onChange }: FieldProps) {
             <button
               type="button"
               onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-              className={`rounded px-2 py-1 transition-colors ${
+              aria-label="Format heading level 2"
+              className={`rounded px-2 py-1 transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-accent)] ${
                 editor.isActive("heading", { level: 2 })
                   ? "bg-[var(--color-accent-dim)] text-[var(--color-accent)] font-bold"
                   : "bg-[var(--color-surface)] text-[var(--color-foreground)] hover:bg-[var(--color-surface-hover)]"
@@ -136,7 +139,8 @@ export function RichTextField({ field, value, onChange }: FieldProps) {
             <button
               type="button"
               onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
-              className={`rounded px-2 py-1 transition-colors ${
+              aria-label="Format heading level 3"
+              className={`rounded px-2 py-1 transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-accent)] ${
                 editor.isActive("heading", { level: 3 })
                   ? "bg-[var(--color-accent-dim)] text-[var(--color-accent)] font-bold"
                   : "bg-[var(--color-surface)] text-[var(--color-foreground)] hover:bg-[var(--color-surface-hover)]"
@@ -149,7 +153,8 @@ export function RichTextField({ field, value, onChange }: FieldProps) {
             <button
               type="button"
               onClick={() => editor.chain().focus().toggleBulletList().run()}
-              className={`rounded px-2 py-1 transition-colors ${
+              aria-label="Format bullet list"
+              className={`rounded px-2 py-1 transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-accent)] ${
                 editor.isActive("bulletList")
                   ? "bg-[var(--color-accent-dim)] text-[var(--color-accent)] font-bold"
                   : "bg-[var(--color-surface)] text-[var(--color-foreground)] hover:bg-[var(--color-surface-hover)]"
@@ -162,7 +167,8 @@ export function RichTextField({ field, value, onChange }: FieldProps) {
             <button
               type="button"
               onClick={() => editor.chain().focus().toggleOrderedList().run()}
-              className={`rounded px-2 py-1 transition-colors ${
+              aria-label="Format ordered list"
+              className={`rounded px-2 py-1 transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-accent)] ${
                 editor.isActive("orderedList")
                   ? "bg-[var(--color-accent-dim)] text-[var(--color-accent)] font-bold"
                   : "bg-[var(--color-surface)] text-[var(--color-foreground)] hover:bg-[var(--color-surface-hover)]"
@@ -175,7 +181,8 @@ export function RichTextField({ field, value, onChange }: FieldProps) {
             <button
               type="button"
               onClick={() => editor.chain().focus().toggleBlockquote().run()}
-              className={`rounded px-2 py-1 transition-colors ${
+              aria-label="Format blockquote"
+              className={`rounded px-2 py-1 transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-accent)] ${
                 editor.isActive("blockquote")
                   ? "bg-[var(--color-accent-dim)] text-[var(--color-accent)] font-bold"
                   : "bg-[var(--color-surface)] text-[var(--color-foreground)] hover:bg-[var(--color-surface-hover)]"
@@ -188,7 +195,8 @@ export function RichTextField({ field, value, onChange }: FieldProps) {
             <button
               type="button"
               onClick={handleSetLink}
-              className={`rounded px-2 py-1 transition-colors ${
+              aria-label="Format link"
+              className={`rounded px-2 py-1 transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-accent)] ${
                 editor.isActive("link")
                   ? "bg-[var(--color-accent-dim)] text-[var(--color-accent)] font-bold"
                   : "bg-[var(--color-surface)] text-[var(--color-foreground)] hover:bg-[var(--color-surface-hover)]"
@@ -209,7 +217,8 @@ export function RichTextField({ field, value, onChange }: FieldProps) {
               type="button"
               onClick={() => fileInputRef.current?.click()}
               disabled={uploading}
-              className="rounded bg-[var(--color-accent-dim)] px-2 py-1 text-[var(--color-accent)] transition-colors hover:bg-[var(--color-accent)] hover:text-[var(--color-background)] disabled:opacity-50"
+              aria-label="Insert image"
+              className="rounded bg-[var(--color-accent-dim)] px-2 py-1 text-[var(--color-accent)] transition-colors hover:bg-[var(--color-accent)] hover:text-[var(--color-background)] disabled:opacity-50 focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-accent)]"
             >
               {uploading ? "Uploading…" : "Insert image"}
             </button>

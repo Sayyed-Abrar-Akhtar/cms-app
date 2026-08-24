@@ -47,7 +47,7 @@ export function TerminalWindow({
 
   return (
     <div
-      className={`w-full ${effectiveMaxWidth} bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg shadow-2xl overflow-hidden transition-all duration-200 ${className}`}
+      className={`w-full ${effectiveMaxWidth} bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg shadow-2xl overflow-hidden transition-all duration-200 motion-reduce:transition-none ${className}`}
     >
       {/* Terminal Header */}
       <div className="bg-[#17171b] px-4 py-2.5 border-b border-[var(--color-border)] flex items-center justify-between select-none">
@@ -64,20 +64,24 @@ export function TerminalWindow({
                 ? "Close window"
                 : "Close window (disabled)"
             }
-            className={`w-3 h-3 rounded-full bg-[var(--color-danger)] inline-block transition-all focus:outline-none focus:ring-1 focus:ring-white/40 ${
+            className={`p-1.5 -m-1 rounded-full flex items-center justify-center transition-all motion-reduce:transition-none motion-reduce:transform-none focus:outline-none focus-visible:ring-1 focus-visible:ring-white/40 ${
               !onClose && !isMinimized
                 ? "opacity-30 cursor-not-allowed"
-                : "opacity-80 hover:opacity-100 hover:scale-110 cursor-pointer"
+                : "opacity-80 hover:opacity-100 cursor-pointer"
             }`}
-          />
+          >
+            <span className="w-3 h-3 rounded-full bg-[var(--color-danger)] block hover:scale-110 motion-reduce:hover:scale-100 transition-transform" />
+          </button>
 
           {/* Yellow Dot (Minimize) */}
           <button
             type="button"
             onClick={handleYellowClick}
             aria-label={isMinimized ? "Restore window" : "Minimize window"}
-            className="w-3 h-3 rounded-full bg-[var(--color-warning)] inline-block opacity-80 hover:opacity-100 hover:scale-110 transition-all focus:outline-none focus:ring-1 focus:ring-white/40 cursor-pointer"
-          />
+            className="p-1.5 -m-1 rounded-full flex items-center justify-center opacity-80 hover:opacity-100 transition-all motion-reduce:transition-none motion-reduce:transform-none focus:outline-none focus-visible:ring-1 focus-visible:ring-white/40 cursor-pointer"
+          >
+            <span className="w-3 h-3 rounded-full bg-[var(--color-warning)] block hover:scale-110 motion-reduce:hover:scale-100 transition-transform" />
+          </button>
 
           {/* Green Dot (Maximize) */}
           <button
@@ -90,8 +94,10 @@ export function TerminalWindow({
                 ? "Restore window size"
                 : "Maximize window"
             }
-            className="w-3 h-3 rounded-full bg-[var(--color-accent)] inline-block opacity-80 hover:opacity-100 hover:scale-110 transition-all focus:outline-none focus:ring-1 focus:ring-white/40 cursor-pointer"
-          />
+            className="p-1.5 -m-1 rounded-full flex items-center justify-center opacity-80 hover:opacity-100 transition-all motion-reduce:transition-none motion-reduce:transform-none focus:outline-none focus-visible:ring-1 focus-visible:ring-white/40 cursor-pointer"
+          >
+            <span className="w-3 h-3 rounded-full bg-[var(--color-accent)] block hover:scale-110 motion-reduce:hover:scale-100 transition-transform" />
+          </button>
         </div>
         <div className="text-xs text-[var(--color-muted)] font-mono tracking-tight">
           {title}

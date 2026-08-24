@@ -148,7 +148,7 @@ export function EditorPageClient({
 
         <div className="space-y-6">
           {error && (
-            <div className="p-3 text-xs bg-red-950/40 text-[var(--color-danger)] border border-[var(--color-danger)]/30 rounded font-mono">
+            <div className="p-3 text-xs bg-[var(--color-surface-hover)] text-[var(--color-danger)] border border-[var(--color-danger)]/30 rounded font-mono">
               [error] {error}
             </div>
           )}
@@ -169,8 +169,9 @@ export function EditorPageClient({
                         type="button"
                         onClick={() => handleMove(index, "up")}
                         disabled={isPending || index === 0}
-                        title="Move up"
-                        className="px-2 py-0.5 text-xs text-[var(--color-foreground)] hover:bg-[var(--color-surface-hover)] disabled:opacity-30 border-r border-[var(--color-border)] transition-colors"
+                        title="Move instance up"
+                        aria-label="Move instance up"
+                        className="px-2 py-0.5 text-xs text-[var(--color-foreground)] hover:bg-[var(--color-surface-hover)] disabled:opacity-30 border-r border-[var(--color-border)] transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-white/40"
                       >
                         ▲ Up
                       </button>
@@ -178,8 +179,9 @@ export function EditorPageClient({
                         type="button"
                         onClick={() => handleMove(index, "down")}
                         disabled={isPending || index === instances.length - 1}
-                        title="Move down"
-                        className="px-2 py-0.5 text-xs text-[var(--color-foreground)] hover:bg-[var(--color-surface-hover)] disabled:opacity-30 transition-colors"
+                        title="Move instance down"
+                        aria-label="Move instance down"
+                        className="px-2 py-0.5 text-xs text-[var(--color-foreground)] hover:bg-[var(--color-surface-hover)] disabled:opacity-30 transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-white/40"
                       >
                         ▼ Down
                       </button>
@@ -188,7 +190,7 @@ export function EditorPageClient({
                       type="button"
                       onClick={() => setInstanceToRemove(instance)}
                       disabled={isPending}
-                      className="text-xs text-[var(--color-danger)] hover:text-red-300 px-2 py-0.5 border border-[var(--color-danger)]/30 hover:border-[var(--color-danger)] rounded transition-colors"
+                      className="text-xs text-[var(--color-danger)] hover:opacity-80 px-2 py-0.5 border border-[var(--color-danger)]/30 hover:border-[var(--color-danger)] rounded transition-colors"
                     >
                       Remove item
                     </button>
@@ -239,7 +241,7 @@ export function EditorPageClient({
                   </strong>{" "}
                   from page &quot;/{page}&quot;?
                 </p>
-                <div className="p-3 bg-red-950/30 border border-[var(--color-danger)]/30 rounded text-xs text-[var(--color-danger)]">
+                <div className="p-3 bg-[var(--color-surface-hover)] border border-[var(--color-danger)]/30 rounded text-xs text-[var(--color-danger)]">
                   ⚠️ Warning: This will permanently delete this instance and all of its filled values.
                 </div>
                 <div className="flex justify-end gap-3 pt-2">

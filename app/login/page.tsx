@@ -110,13 +110,13 @@ export default function LoginPage() {
             </div>
 
             {status === "error" && (
-              <div className="p-3 bg-red-950/30 border border-[var(--color-danger)]/40 rounded text-xs text-[var(--color-danger)] font-mono">
+              <div className="p-3 bg-[var(--color-surface-hover)] border border-[var(--color-danger)]/40 rounded text-xs text-[var(--color-danger)] font-mono">
                 [error] {errorMessage}
               </div>
             )}
 
             {status === "success" && (
-              <div className="p-3 bg-emerald-950/30 border border-[var(--color-accent)]/40 rounded text-xs text-[var(--color-accent)] font-mono">
+              <div className="p-3 bg-[var(--color-surface-hover)] border border-[var(--color-accent)]/40 rounded text-xs text-[var(--color-accent)] font-mono">
                 [success] Verified. Redirecting to dashboard...
               </div>
             )}

@@ -74,7 +74,7 @@ export function EditorList({ organizationId, editors }: EditorListProps) {
       </div>
 
       {error && (
-        <div className="p-3 bg-red-950/40 border border-[var(--color-danger)]/50 rounded text-xs text-[var(--color-danger)]">
+        <div className="p-3 bg-[var(--color-surface-hover)] border border-[var(--color-danger)]/50 rounded text-xs text-[var(--color-danger)]">
           [error] {error}
         </div>
       )}
@@ -147,7 +147,7 @@ export function EditorList({ organizationId, editors }: EditorListProps) {
                     <button
                       type="button"
                       onClick={() => setConfirmId(editor.id)}
-                      className="py-1 px-3 bg-red-950/30 hover:bg-red-900/40 border border-[var(--color-danger)]/40 text-[var(--color-danger)] rounded font-semibold text-[11px] transition-colors"
+                      className="py-1 px-3 bg-[var(--color-surface-hover)] hover:bg-[var(--color-border)] border border-[var(--color-danger)]/40 text-[var(--color-danger)] rounded font-semibold text-[11px] transition-colors"
                     >
                       Remove
                     </button>

@@ -100,7 +100,7 @@ export function OrganizationDetailClient({
                   className={`px-2 py-0.5 text-[10px] uppercase font-bold tracking-wider rounded border ${
                     org.type === "COMPANY"
                       ? "bg-[var(--color-accent-dim)] text-[var(--color-accent)] border-[var(--color-accent)]/30"
-                      : "bg-purple-950/40 text-purple-300 border-purple-800/40"
+                      : "bg-[var(--color-surface-hover)] text-[var(--color-foreground)] border-[var(--color-border)]"
                   }`}
                 >
                   {org.type}

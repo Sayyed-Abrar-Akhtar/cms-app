@@ -165,7 +165,7 @@ export function PageBuilder({
       </div>
 
       {error && (
-        <div className="p-3 text-xs bg-red-950/40 text-[var(--color-danger)] border border-[var(--color-danger)]/30 rounded">
+        <div className="p-3 text-xs bg-[var(--color-surface-hover)] text-[var(--color-danger)] border border-[var(--color-danger)]/30 rounded">
           {error}
         </div>
       )}
@@ -272,7 +272,7 @@ export function PageBuilder({
                         {inst.componentTypeName}
                       </span>
                       {inst.isRepeatable && (
-                        <span className="text-[10px] bg-blue-950/40 text-blue-400 border border-blue-800/40 px-1.5 py-0.2 rounded">
+                        <span className="text-[10px] bg-[var(--color-surface-hover)] text-[var(--color-accent)] border border-[var(--color-border)] px-1.5 py-0.2 rounded">
                           repeatable
                         </span>
                       )}
@@ -290,8 +290,9 @@ export function PageBuilder({
                       type="button"
                       onClick={() => handleMove(index, "up")}
                       disabled={isPending || index === 0}
-                      title="Move up"
-                      className="px-2 py-1 text-xs text-[var(--color-foreground)] hover:bg-[var(--color-surface-hover)] disabled:opacity-30 disabled:hover:bg-transparent border-r border-[var(--color-border)]"
+                      title="Move instance up"
+                      aria-label="Move instance up"
+                      className="px-2 py-1 text-xs text-[var(--color-foreground)] hover:bg-[var(--color-surface-hover)] disabled:opacity-30 disabled:hover:bg-transparent border-r border-[var(--color-border)] focus:outline-none focus-visible:ring-1 focus-visible:ring-white/40"
                     >
                       ▲ Up
                     </button>
@@ -299,8 +300,9 @@ export function PageBuilder({
                       type="button"
                       onClick={() => handleMove(index, "down")}
                       disabled={isPending || index === pageInstances.length - 1}
-                      title="Move down"
-                      className="px-2 py-1 text-xs text-[var(--color-foreground)] hover:bg-[var(--color-surface-hover)] disabled:opacity-30 disabled:hover:bg-transparent"
+                      title="Move instance down"
+                      aria-label="Move instance down"
+                      className="px-2 py-1 text-xs text-[var(--color-foreground)] hover:bg-[var(--color-surface-hover)] disabled:opacity-30 disabled:hover:bg-transparent focus:outline-none focus-visible:ring-1 focus-visible:ring-white/40"
                     >
                       ▼ Down
                     </button>
@@ -311,7 +313,7 @@ export function PageBuilder({
                     type="button"
                     onClick={() => setInstanceToRemove(inst)}
                     disabled={isPending}
-                    className="text-xs text-[var(--color-danger)] hover:text-red-300 px-2 py-1 border border-[var(--color-danger)]/30 hover:border-[var(--color-danger)] rounded transition-colors"
+                    className="text-xs text-[var(--color-danger)] hover:opacity-80 px-2 py-1 border border-[var(--color-danger)]/30 hover:border-[var(--color-danger)] rounded transition-colors"
                   >
                     Remove
                   </button>
@@ -336,7 +338,7 @@ export function PageBuilder({
               </strong>{" "}
               from page &quot;/{instanceToRemove.page}&quot;?
             </p>
-            <div className="p-3 bg-red-950/30 border border-[var(--color-danger)]/30 rounded text-xs text-[var(--color-danger)] font-mono">
+            <div className="p-3 bg-[var(--color-surface-hover)] border border-[var(--color-danger)]/30 rounded text-xs text-[var(--color-danger)] font-mono">
               ⚠️ Warning: This will permanently delete this instance and all of its filled values.
             </div>
             <div className="flex justify-end gap-3 pt-2">

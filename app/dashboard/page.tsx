@@ -49,7 +49,7 @@ export default async function DashboardPage({
         <TerminalWindow title="~/cms/dashboard" redirectUrl="/" defaultMaxWidth="max-w-4xl">
           <div className="p-6 space-y-6">
             {error && (
-              <div className="p-3 bg-red-950/30 border border-[var(--color-danger)]/40 rounded text-xs text-[var(--color-danger)]">
+              <div className="p-3 bg-[var(--color-surface-hover)] border border-[var(--color-danger)]/40 rounded text-xs text-[var(--color-danger)]">
                 [error] {error}
               </div>
             )}

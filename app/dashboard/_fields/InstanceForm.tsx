@@ -143,7 +143,7 @@ export function InstanceForm({
 
       <div className="space-y-5 px-4 py-4">
         {error && (
-          <p className="rounded border border-[var(--color-danger)]/40 bg-red-950/30 p-2 font-sans text-xs text-[var(--color-danger)]">
+          <p className="rounded border border-[var(--color-danger)]/40 bg-[var(--color-surface-hover)] p-2 font-sans text-xs text-[var(--color-danger)]">
             [error] {error}
           </p>
         )}

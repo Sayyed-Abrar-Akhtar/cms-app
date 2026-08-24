@@ -177,10 +177,10 @@ earned by the content (these are literally field configs), not decoration.
   only ever created via the seed script (superadmin) or the Invite Editor
   flow (editors). The magic-link verify endpoint must reject unknown emails.
 - Every mutation (Server Action or Route Handler) re-checks `role` and, for
-  editors, `organization` **server-side** from the session — never trust a
+  editors, `organizations` array **server-side** from the session — never trust a
   client-supplied `organizationId` or `role`.
 - An EDITOR's queries/writes are always scoped to their own
-  `organization` — filter server-side, don't rely on the UI hiding other
+  `organizations` array — filter server-side, don't rely on the UI hiding other
   orgs' data.
 - Session cookie: httpOnly, secure, `sameSite: "lax"`, signed with `jose`
   using `SESSION_SECRET`, reasonably short expiry.
