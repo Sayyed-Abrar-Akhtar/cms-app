@@ -16,6 +16,8 @@ describe("Rate Limiting Tests", () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let checkEmailPOST: any;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let verifyPOST: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let publicApiGET: any;
 
   beforeAll(async () => {
@@ -26,10 +28,12 @@ describe("Rate Limiting Tests", () => {
 
     const orgMod = await import("../../models/Organization");
     const checkEmailMod = await import("../../app/api/auth/check-email/route");
+    const verifyMod = await import("../../app/api/auth/verify/route");
     const publicApiMod = await import("../../app/api/public/[orgSlug]/[page]/route");
 
     Organization = orgMod.Organization;
     checkEmailPOST = checkEmailMod.POST;
+    verifyPOST = verifyMod.POST;
     publicApiGET = publicApiMod.GET;
   });
 
@@ -86,6 +90,32 @@ describe("Rate Limiting Tests", () => {
 
     const remaining = lastRes!.headers.get("X-RateLimit-Remaining");
     expect(remaining).toBe("0");
+  });
+
+  it("hitting verify rapidly from the same source gets rate-limited with 429 and Retry-After header", async () => {
+    const ip = "10.0.0.2";
+    let lastRes: Response | null = null;
+
+    for (let i = 0; i < 11; i++) {
+      const req = new Request("http://localhost/api/auth/verify", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          "x-forwarded-for": ip,
+        },
+        body: JSON.stringify({ didToken: "invalid_token" }),
+      });
+      lastRes = await verifyPOST(req);
+    }
+
+    expect(lastRes).not.toBeNull();
+    expect(lastRes!.status).toBe(429);
+    const body = await lastRes!.json();
+    expect(body).toEqual({ error: "Too Many Requests" });
+
+    const retryAfter = lastRes!.headers.get("Retry-After");
+    expect(retryAfter).not.toBeNull();
+    expect(Number(retryAfter)).toBeGreaterThan(0);
   });
 
   it("public API rate limit is scoped per-organization (hitting limit on Org A does not starve Org B)", async () => {
