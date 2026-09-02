@@ -15,7 +15,8 @@ export async function proxy(request: NextRequest) {
   // Superadmin restricted paths
   const isSuperadminOnly =
     pathname.startsWith("/dashboard/components") ||
-    pathname.startsWith("/dashboard/organizations");
+    pathname.startsWith("/dashboard/organizations") ||
+    pathname.startsWith("/dashboard/users");
 
   if (isSuperadminOnly && session.role !== "SUPERADMIN") {
     const dashboardUrl = new URL("/dashboard", request.url);
