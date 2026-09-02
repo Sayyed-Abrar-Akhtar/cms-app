@@ -187,6 +187,7 @@ export async function inviteEditorAction(
 
     revalidatePath("/dashboard/organizations");
     revalidatePath(`/dashboard/organizations/${org.slug}`);
+    revalidatePath("/dashboard/users");
 
     // Send email notification for new attachment
     const emailResult = await sendEditorInviteEmail({
@@ -243,6 +244,7 @@ export async function removeEditorAction(
       revalidatePath(`/dashboard/organizations/${org.slug}`);
     }
     revalidatePath("/dashboard/organizations");
+    revalidatePath("/dashboard/users");
 
     return { success: true };
   } catch (err) {
@@ -277,6 +279,7 @@ export async function resetEditorQuotaAction(
       }
     }
     revalidatePath("/dashboard/organizations");
+    revalidatePath("/dashboard/users");
 
     return { success: true };
   } catch (err) {

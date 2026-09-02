@@ -78,7 +78,7 @@ export default async function DashboardPage({
                 <h2 className="text-sm font-semibold text-[var(--color-accent)]">
                   Superadmin Controls
                 </h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <Link
                     href="/dashboard/components"
                     className="p-4 bg-[var(--color-surface-hover)] border border-[var(--color-border)] rounded hover:border-[var(--color-accent)] transition-colors block"
@@ -100,6 +100,18 @@ export default async function DashboardPage({
                     </div>
                     <div className="text-xs text-[var(--color-muted)] mt-1">
                       Manage client organizations & editor access.
+                    </div>
+                  </Link>
+
+                  <Link
+                    href="/dashboard/users"
+                    className="p-4 bg-[var(--color-surface-hover)] border border-[var(--color-border)] rounded hover:border-[var(--color-accent)] transition-colors block"
+                  >
+                    <div className="text-sm font-bold text-[var(--color-foreground)]">
+                      👤 User Directory
+                    </div>
+                    <div className="text-xs text-[var(--color-muted)] mt-1">
+                      View all users, organizations & reset quotas.
                     </div>
                   </Link>
                 </div>
