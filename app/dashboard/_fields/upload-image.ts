@@ -36,7 +36,13 @@ export async function uploadImageToCloudinary(file: File): Promise<string> {
   );
 
   if (!uploadRes.ok) {
-    throw new Error("Cloudinary rejected the upload — check the file and try again.");
+    const errorBody = (await uploadRes.json().catch(() => null)) as {
+      error?: { message?: string };
+    } | null;
+    const message =
+      errorBody?.error?.message ||
+      "Cloudinary rejected the upload — check the file and try again.";
+    throw new Error(message);
   }
 
   const data = (await uploadRes.json()) as { secure_url?: string };

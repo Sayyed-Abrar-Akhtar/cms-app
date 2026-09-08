@@ -78,6 +78,82 @@ describe("Cloudinary & RichText Integration Tests", () => {
     global.fetch = globalFetch;
   });
 
+  it("uploadImageToCloudinary surfaces specific Cloudinary error message on rejection", async () => {
+    const { uploadImageToCloudinary } = await import("@/app/dashboard/_fields/upload-image");
+
+    const globalFetch = global.fetch;
+    global.fetch = vi.fn().mockImplementation((url: string | URL | Request) => {
+      const urlString = String(url);
+      if (urlString.includes("/api/cloudinary/sign")) {
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({
+            timestamp: 1700000000,
+            signature: "mock_signature",
+            apiKey: "test-api-key",
+            cloudName: "test-cloud",
+            folder: "cms",
+          }),
+        });
+      }
+      if (urlString.includes("api.cloudinary.com/v1_1/test-cloud/image/upload")) {
+        return Promise.resolve({
+          ok: false,
+          status: 400,
+          json: async () => ({
+            error: { message: "Invalid image file" },
+          }),
+        });
+      }
+      return globalFetch(url);
+    });
+
+    const fakeFile = new File(["dummy"], "not-an-image.txt", { type: "text/plain" });
+
+    await expect(uploadImageToCloudinary(fakeFile)).rejects.toThrow("Invalid image file");
+
+    global.fetch = globalFetch;
+  });
+
+  it("uploadImageToCloudinary falls back to generic error message if response body cannot be parsed", async () => {
+    const { uploadImageToCloudinary } = await import("@/app/dashboard/_fields/upload-image");
+
+    const globalFetch = global.fetch;
+    global.fetch = vi.fn().mockImplementation((url: string | URL | Request) => {
+      const urlString = String(url);
+      if (urlString.includes("/api/cloudinary/sign")) {
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({
+            timestamp: 1700000000,
+            signature: "mock_signature",
+            apiKey: "test-api-key",
+            cloudName: "test-cloud",
+            folder: "cms",
+          }),
+        });
+      }
+      if (urlString.includes("api.cloudinary.com/v1_1/test-cloud/image/upload")) {
+        return Promise.resolve({
+          ok: false,
+          status: 500,
+          json: async () => {
+            throw new Error("Invalid JSON");
+          },
+        });
+      }
+      return globalFetch(url);
+    });
+
+    const fakeFile = new File(["dummy"], "bad.txt", { type: "text/plain" });
+
+    await expect(uploadImageToCloudinary(fakeFile)).rejects.toThrow(
+      "Cloudinary rejected the upload — check the file and try again."
+    );
+
+    global.fetch = globalFetch;
+  });
+
   it("server-side IMAGE field validation accepts res.cloudinary.com and rejects non-Cloudinary URLs", async () => {
     const { validateFieldValue } = await import("@/lib/validate-field");
     const imageField: FieldDefinition = {
